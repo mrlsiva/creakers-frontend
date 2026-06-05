@@ -1,0 +1,308 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Diwali Color Theme */
+:root {
+  --primary-red: #CC0033;
+  --primary-gold: #FFD700;
+  --primary-orange: #FF8C00;
+  --dark-red: #8B0000;
+  --light-gold: #FFF8DC;
+  --white: #FFFFFF;
+  --dark-bg: #1a1a1a;
+  --light-gray: #f5f5f5;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.header {
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+  color: var(--white);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.header-banner {
+  background: linear-gradient(90deg, var(--primary-gold), var(--primary-orange));
+  color: var(--dark-red);
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  position: relative;
+}
+
+.banner-scroll {
+  animation: scroll-left 20s linear infinite;
+  white-space: nowrap;
+  display: inline-block;
+  padding-left: 100%;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  font-size: 28px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--primary-gold);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.nav-links a.nav-active {
+  color: var(--primary-gold);
+  font-weight: 700;
+  border-bottom: 2px solid var(--primary-gold);
+  padding-bottom: 2px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--primary-gold);
+  color: var(--dark-red);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid var(--white);
+}
+
+.btn-secondary:hover {
+  background: var(--white);
+  color: var(--primary-red);
+}
+
+.cart-icon, .whatsapp-icon {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Banner */
+.hero {
+  background: linear-gradient(rgba(204, 0, 51, 0.7), rgba(139, 0, 0, 0.7)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="p" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="3" fill="%23FFD700" opacity="0.3"/><text x="20" y="60" font-size="40" fill="%23FF8C00" opacity="0.2">✨</text></pattern></defs><rect width="1200" height="600" fill="%238B0000"/><rect width="1200" height="600" fill="url(%23p)"/></svg>');
+  color: var(--white);
+  padding: 80px 30px;
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  opacity: 0.95;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Footer Styles */
+.footer {
+  background: linear-gradient(135deg, var(--dark-bg) 0%, var(--primary-red) 100%);
+  color: var(--white);
+  padding: 40px 30px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.footer-section h3 {
+  color: var(--primary-gold);
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.footer-section p, .footer-section a {
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.8;
+}
+
+.footer-section a {
+  color: var(--primary-gold);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: var(--white);
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-links a {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  background: var(--primary-gold);
+  color: var(--dark-red);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 35px;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  background: var(--primary-orange);
+  transform: scale(1.1);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Page Container */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  width: 100%;
+  flex: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 15px;
+  }
+
+  .nav-links {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .hero-content h1 {
+    font-size: 32px;
+  }
+
+  .hero-content p {
+    font-size: 14px;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+  }
+
+  .page-container {
+    padding: 20px 15px;
+  }
+}
