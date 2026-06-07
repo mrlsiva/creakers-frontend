@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --version)",
+      "Bash(find / -iname \"chromium-cli*\" 2>/dev/null | head -5; find / -iname \"*playwright*\" -maxdepth 6 2>/dev/null | head -10)",
+      "Read(//c//**)"
+    ]
+  }
+}

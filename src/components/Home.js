@@ -1,16 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+const FESTIVAL_DATE = new Date('2026-11-08T00:00:00');
+
+const getTimeLeft = () => {
+  const diff = Math.max(0, FESTIVAL_DATE.getTime() - Date.now());
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+};
+
+const pad = (n) => String(n).padStart(2, '0');
 
 const Home = () => {
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+
+  useEffect(() => {
+    const tick = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(tick);
+  }, []);
+
   return (
     <div className="home">
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
-          <h1>✨ Happy Diwali ✨</h1>
-          <p>Festival of Lights - Light up your celebrations with our premium crackers & fireworks</p>
+          <span className="hero-badge">✨ Premium Quality Fireworks Since 1990</span>
+          <h1>Vigo Crackers</h1>
+          <h2 className="hero-subtitle">Light Up Your Celebrations</h2>
+          <p>Experience the finest selection of premium fireworks and crackers. Safe, certified, and delivered to your doorstep.</p>
           <div className="hero-cta">
-            <a href="#products-page" className="btn btn-primary">Browse Products</a>
-            <a href="#quick-enquiry" className="btn btn-secondary">Quick Enquiry</a>
+            <a href="#products-page" className="btn btn-primary btn-lg">Shop Now</a>
+            <a href="#catalog" className="btn btn-outline-gold btn-lg">View Catalog</a>
+          </div>
+        </div>
+      </section>
+
+      {/* Festival Countdown Offer */}
+      <section className="festival-offer">
+        <div className="festival-offer-card">
+          <div className="festival-offer-info">
+            <h2>Diwali Festival Special Offer</h2>
+            <p>Exclusive deals ending soon. Hurry up!</p>
+            <a href="#products-page" className="btn btn-primary">Shop Festival Offers</a>
+          </div>
+          <div className="countdown">
+            <div className="countdown-item">
+              <span className="countdown-value">{pad(timeLeft.days)}</span>
+              <span className="countdown-label">Days</span>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item">
+              <span className="countdown-value">{pad(timeLeft.hours)}</span>
+              <span className="countdown-label">Hours</span>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item">
+              <span className="countdown-value">{pad(timeLeft.minutes)}</span>
+              <span className="countdown-label">Minutes</span>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item">
+              <span className="countdown-value">{pad(timeLeft.seconds)}</span>
+              <span className="countdown-label">Seconds</span>
+            </div>
           </div>
         </div>
       </section>
@@ -33,7 +88,7 @@ const Home = () => {
         </section>
 
         {/* How to Order Section */}
-        <section style={{ marginBottom: '40px' }}>
+        <section id="how-to-order" style={{ marginBottom: '40px' }}>
           <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#CC0033', fontSize: '28px' }}>How to Order</h2>
           <div style={{
             display: 'grid',

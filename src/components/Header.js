@@ -20,30 +20,24 @@ const Header = () => {
         </Link>
         <nav>
           <ul className="nav-links">
-            <li><a href={anchor('#home')}>Home</a></li>
+            <li><Link to="/" className={isHome ? 'nav-active' : ''}>Home</Link></li>
+            <li><a href={anchor('#about')}>About</a></li>
             <li>
               <Link to="/products" className={pathname === '/products' ? 'nav-active' : ''}>
-                Products
+                Categories
               </Link>
             </li>
-            <li><a href={anchor('#about')}>About</a></li>
-            <li><a href={anchor('#safety')}>Safety Tips</a></li>
-            <li><a href={anchor('#price')}>Price List</a></li>
-            <li>
-              <Link to="/quick-enquiry" className={pathname === '/quick-enquiry' ? 'nav-active' : ''}>
-                Quick Enquiry
-              </Link>
-            </li>
+            <li><a href={anchor('#how-to-order')}>How to Order</a></li>
             <li>
               <Link to="/contact" className={pathname === '/contact' ? 'nav-active' : ''}>Contact</Link>
             </li>
           </ul>
         </nav>
         <div className="header-actions">
-          <Link to="/order-track" className={`btn btn-secondary${pathname === '/order-track' ? ' nav-active' : ''}`}>Order Track</Link>
-          <a href="https://wa.me/919876543210" className="whatsapp-icon" title="WhatsApp">
-            💬
+          <a href="tel:+919876543210" className="call-now">
+            <span aria-hidden="true">📞</span> Call Now
           </a>
+          <Link to="/quick-enquiry" className="btn btn-order-now">Order Now</Link>
         </div>
       </div>
     </header>
