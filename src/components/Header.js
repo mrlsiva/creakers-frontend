@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getSite, resolveAssetUrl } from '../services/api';
+import { getContentPage, resolveAssetUrl } from '../services/api';
 
-const Header = () => {
+const DEFAULT_BANNER_TEXT = '🎆 Diwali Booking Started...! | 80% Discount offer 🎆 | Minimum order for Tamil Nadu ₹3,000/- | Other states ₹5,000/-';
+
+const stripHtml = (html) => {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent?.replace(/\s+/g, ' ').trim() || '';
+};
+
+const Header = ({ site }) => {
   const { pathname } = useLocation();
   const isHome = pathname === '/';
   const anchor = (hash) => isHome ? hash : `/${hash}`;
-  const [site, setSite] = useState(null);
+  const [bannerText, setBannerText] = useState(DEFAULT_BANNER_TEXT);
 
   useEffect(() => {
     let cancelled = false;
-    getSite()
+    getContentPage(undefined, 'banner-scrolling-text')
       .then((res) => {
-        if (!cancelled && res?.success && res.data) {
-          setSite(res.data);
+        const text = stripHtml(res?.data?.body);
+        if (!cancelled && res?.success && text) {
+          setBannerText(text);
         }
       })
       .catch(() => {});
@@ -26,7 +35,7 @@ const Header = () => {
     <header className="header">
       <div className="header-banner">
         <div className="banner-scroll">
-          🎆 Diwali Booking Started...! | 80% Discount offer 🎆 | Minimum order for Tamil Nadu ₹3,000/- | Other states ₹5,000/-
+          {bannerText}
         </div>
       </div>
       <div className="header-top">
