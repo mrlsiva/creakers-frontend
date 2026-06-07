@@ -31,6 +31,17 @@ export const getSite = async (slug = SITE_SLUG) => {
   }
 };
 
+// Home Banner
+export const getHomeBanner = async (slug = SITE_SLUG) => {
+  try {
+    const response = await api.get(`/${slug}/home-banner`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching home banner:', error);
+    throw error;
+  }
+};
+
 // Categories
 export const getCategories = async (slug = SITE_SLUG) => {
   try {

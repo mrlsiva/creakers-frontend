@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { getHomeBanner } from '../services/api';
 
 const FESTIVAL_DATE = new Date('2026-11-08T00:00:00');
+
+const DEFAULT_BANNER = {
+  image: '',
+  title: 'Vigo Crackers',
+  second_title: 'Light Up Your Celebrations',
+  description: 'Experience the finest selection of premium fireworks and crackers. Safe, certified, and delivered to your doorstep.',
+  top_small_description: 'Premium Quality Fireworks Since 1990',
+  buttons: [
+    { label: 'Shop Now', url: '#products-page', open_in_new_tab: false },
+    { label: 'View Catalog', url: '#catalog', open_in_new_tab: false },
+  ],
+};
 
 const getTimeLeft = () => {
   const diff = Math.max(0, FESTIVAL_DATE.getTime() - Date.now());
@@ -16,24 +29,51 @@ const pad = (n) => String(n).padStart(2, '0');
 
 const Home = () => {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+  const [banner, setBanner] = useState(DEFAULT_BANNER);
 
   useEffect(() => {
     const tick = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
     return () => clearInterval(tick);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    getHomeBanner()
+      .then((res) => {
+        if (!cancelled && res?.success && res.data) {
+          setBanner(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="home">
       {/* Hero Section */}
-      <section className="hero">
+      <section
+        className="hero"
+        style={banner.image ? { backgroundImage: `url(${banner.image})` } : undefined}
+      >
         <div className="hero-content">
-          <span className="hero-badge">✨ Premium Quality Fireworks Since 1990</span>
-          <h1>Vigo Crackers</h1>
-          <h2 className="hero-subtitle">Light Up Your Celebrations</h2>
-          <p>Experience the finest selection of premium fireworks and crackers. Safe, certified, and delivered to your doorstep.</p>
+          <span className="hero-badge">✨ {banner.top_small_description}</span>
+          <h1>{banner.title}</h1>
+          <h2 className="hero-subtitle">{banner.second_title}</h2>
+          <p>{banner.description}</p>
           <div className="hero-cta">
-            <a href="#products-page" className="btn btn-primary btn-lg">Shop Now</a>
-            <a href="#catalog" className="btn btn-outline-gold btn-lg">View Catalog</a>
+            {banner.buttons?.map((btn, idx) => (
+              <a
+                key={idx}
+                href={btn.url}
+                target={btn.open_in_new_tab ? '_blank' : undefined}
+                rel={btn.open_in_new_tab ? 'noopener noreferrer' : undefined}
+                className={`btn ${idx === 0 ? 'btn-primary' : 'btn-outline-gold'} btn-lg`}
+              >
+                {btn.label}
+              </a>
+            ))}
           </div>
         </div>
       </section>
