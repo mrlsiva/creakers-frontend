@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { getSite, resolveAssetUrl } from '../services/api';
 
 const Header = () => {
   const { pathname } = useLocation();
   const isHome = pathname === '/';
   const anchor = (hash) => isHome ? hash : `/${hash}`;
+  const [site, setSite] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSite()
+      .then((res) => {
+        if (!cancelled && res?.success && res.data) {
+          setSite(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <header className="header">
@@ -15,8 +31,12 @@ const Header = () => {
       </div>
       <div className="header-top">
         <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
-          <span className="logo-icon">💥</span>
-          <span>VIGO CREAKERS</span>
+          {site?.logo ? (
+            <img src={resolveAssetUrl(site.logo)} alt={site.name || 'Logo'} className="logo-image" />
+          ) : (
+            <span className="logo-icon">💥</span>
+          )}
+          <span>{site?.name ? site.name.toUpperCase() : 'VIGO CREAKERS'}</span>
         </Link>
         <nav>
           <ul className="nav-links">

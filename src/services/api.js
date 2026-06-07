@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const ASSET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 const SITE_SLUG = 'vigovigo';
+
+export const resolveAssetUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${ASSET_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,

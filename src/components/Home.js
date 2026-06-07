@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getHomeBanner } from '../services/api';
+import { getHomeBanner, resolveAssetUrl } from '../services/api';
 
 const FESTIVAL_DATE = new Date('2026-11-08T00:00:00');
 
@@ -55,7 +55,7 @@ const Home = () => {
       {/* Hero Section */}
       <section
         className="hero"
-        style={banner.image ? { backgroundImage: `url(${banner.image})` } : undefined}
+        style={banner.image ? { backgroundImage: `url(${resolveAssetUrl(banner.image)})` } : undefined}
       >
         <div className="hero-content">
           <span className="hero-badge">✨ {banner.top_small_description}</span>
