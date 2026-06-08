@@ -3,8 +3,11 @@ import { getHomeBanner, resolveAssetUrl } from '../services/api';
 
 const FESTIVAL_DATE = new Date('2026-11-08T00:00:00');
 
+const MOBILE_QUERY = '(max-width: 768px)';
+
 const DEFAULT_BANNER = {
   image: '',
+  mobile_image: '',
   title: 'Vigo Crackers',
   second_title: 'Light Up Your Celebrations',
   description: 'Experience the finest selection of premium fireworks and crackers. Safe, certified, and delivered to your doorstep.',
@@ -30,6 +33,16 @@ const pad = (n) => String(n).padStart(2, '0');
 const Home = () => {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft);
   const [banner, setBanner] = useState(DEFAULT_BANNER);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const handleChange = (e) => setIsMobile(e.matches);
+    mql.addEventListener('change', handleChange);
+    return () => mql.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     const tick = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
@@ -50,12 +63,14 @@ const Home = () => {
     };
   }, []);
 
+  const heroImage = (isMobile && banner.mobile_image) ? banner.mobile_image : banner.image;
+
   return (
     <div className="home">
       {/* Hero Section */}
       <section
         className="hero"
-        style={banner.image ? { backgroundImage: `url(${resolveAssetUrl(banner.image)})` } : undefined}
+        style={heroImage ? { backgroundImage: `url(${resolveAssetUrl(heroImage)})` } : undefined}
       >
         <div className="hero-content">
           <span className="hero-badge">✨ {banner.top_small_description}</span>

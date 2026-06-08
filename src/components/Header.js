@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getContentPage, resolveAssetUrl } from '../services/api';
 
@@ -12,9 +12,32 @@ const stripHtml = (html) => {
 
 const Header = ({ site }) => {
   const { pathname } = useLocation();
-  const isHome = pathname === '/';
-  const anchor = (hash) => isHome ? hash : `/${hash}`;
+  const isHome = pathname === '/home';
+  const anchor = (hash) => isHome ? hash : `/home${hash}`;
   const [bannerText, setBannerText] = useState(DEFAULT_BANNER_TEXT);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [bannerText]);
+
+  useEffect(() => {
+    document.body.classList.toggle('menu-open', menuOpen);
+    return () => document.body.classList.remove('menu-open');
+  }, [menuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +55,7 @@ const Header = ({ site }) => {
   }, []);
 
   return (
-    <header className="header">
+    <header className="header" ref={headerRef}>
       <div className="header-banner">
         <div className="banner-scroll">
           {bannerText}
@@ -47,9 +70,23 @@ const Header = ({ site }) => {
           )}
           <span>{site?.name ? site.name.toUpperCase() : 'VIGO CREAKERS'}</span>
         </Link>
-        <nav>
+        <button
+          type="button"
+          className={`nav-toggle${menuOpen ? ' nav-toggle-open' : ''}`}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span className="nav-toggle-bar" />
+          <span className="nav-toggle-bar" />
+          <span className="nav-toggle-bar" />
+        </button>
+        <nav
+          className={menuOpen ? 'nav-open' : ''}
+          style={{ '--header-height': `${headerHeight}px` }}
+        >
           <ul className="nav-links">
-            <li><Link to="/" className={isHome ? 'nav-active' : ''}>Home</Link></li>
+            <li><Link to="/home" className={isHome ? 'nav-active' : ''}>Home</Link></li>
             <li><a href={anchor('#about')}>About</a></li>
             <li>
               <Link to="/products" className={pathname === '/products' ? 'nav-active' : ''}>
@@ -61,12 +98,18 @@ const Header = ({ site }) => {
               <Link to="/contact" className={pathname === '/contact' ? 'nav-active' : ''}>Contact</Link>
             </li>
           </ul>
+          <div className="header-actions header-actions-mobile">
+            <a href="tel:+919876543210" className="call-now">
+              <span aria-hidden="true">📞</span> Call Now
+            </a>
+            <Link to="/" className="btn btn-order-now">Order Now</Link>
+          </div>
         </nav>
-        <div className="header-actions">
+        <div className="header-actions header-actions-desktop">
           <a href="tel:+919876543210" className="call-now">
             <span aria-hidden="true">📞</span> Call Now
           </a>
-          <Link to="/quick-enquiry" className="btn btn-order-now">Order Now</Link>
+          <Link to="/" className="btn btn-order-now">Order Now</Link>
         </div>
       </div>
     </header>

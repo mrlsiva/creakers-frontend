@@ -9,6 +9,7 @@ import QuickEnquiry from './components/QuickEnquiry';
 import OrderTrack from './components/OrderTrack';
 import Contact from './components/Contact';
 import UnderMaintenance from './components/UnderMaintenance';
+import WelcomePopup from './components/WelcomePopup';
 import { getSite, resolveAssetUrl } from './services/api';
 
 function App() {
@@ -75,12 +76,13 @@ function App() {
 
   return (
     <BrowserRouter>
+      <WelcomePopup />
       <Header site={site} />
       <main className="main">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<QuickEnquiry />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/products" element={<Products />} />
-          <Route path="/quick-enquiry" element={<QuickEnquiry />} />
           <Route path="/order-track" element={<OrderTrack />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>

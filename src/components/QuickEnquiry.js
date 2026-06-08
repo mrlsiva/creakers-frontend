@@ -3,10 +3,20 @@ import { getProducts, placeOrder } from '../services/api';
 import './QuickEnquiry.css';
 
 const API_BASE = 'http://127.0.0.1:8000';
+const CART_STORAGE_KEY = 'vigo_qe_cart';
+
+const loadStoredCart = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CART_STORAGE_KEY));
+    return stored && typeof stored === 'object' ? stored : {};
+  } catch {
+    return {};
+  }
+};
 
 const QuickEnquiry = () => {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState({}); // { productId: qty }
+  const [cart, setCart] = useState(loadStoredCart); // { productId: qty }
   const [loading, setLoading] = useState(true);
   const [showCheckout, setShowCheckout] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +35,12 @@ const QuickEnquiry = () => {
     customerPincode: '',
     notes: '',
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {}
+  }, [cart]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,7 +74,12 @@ const QuickEnquiry = () => {
   const increment = useCallback((id) => setQty(id, getQty(id) + 1), [cart]);
   const decrement = useCallback((id) => setQty(id, getQty(id) - 1), [cart]);
 
-  const clearCart = () => setCart({});
+  const clearCart = () => {
+    setCart({});
+    try {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } catch {}
+  };
 
   const cartItems = products.filter(p => cart[p.id] > 0).map(p => ({
     ...p,
@@ -108,7 +129,7 @@ const QuickEnquiry = () => {
           status: details.status || 'Processing',
         });
         setSubmitted(true);
-        setCart({});
+        clearCart();
         setFormData({
           customerName: '', customerPhone: '', customerEmail: '',
           customerAddress: '', customerCity: '', customerDistrict: '',

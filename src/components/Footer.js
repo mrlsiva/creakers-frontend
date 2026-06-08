@@ -58,7 +58,7 @@ const Footer = () => {
           <h3>Quick Links</h3>
           <ul style={{ listStyle: 'none' }}>
             <li><Link to="/products">Products</Link></li>
-            <li><Link to="/quick-enquiry">Quick Enquiry</Link></li>
+            <li><Link to="/">Quick Enquiry</Link></li>
             <li><Link to="/order-track">Order Tracking</Link></li>
             <li><Link to="/contact">Contact Us</Link></li>
           </ul>

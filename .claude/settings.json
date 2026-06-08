@@ -3,7 +3,22 @@
     "allow": [
       "Bash(npx --version)",
       "Bash(find / -iname \"chromium-cli*\" 2>/dev/null | head -5; find / -iname \"*playwright*\" -maxdepth 6 2>/dev/null | head -10)",
-      "Read(//c//**)"
+      "Read(//c//**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(npx --yes chromium-cli --help)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(npx --yes playwright install chromium)",
+      "Bash(node verify-menu.js)",
+      "Bash(npx --yes -p playwright node verify-menu.js)",
+      "Bash(mkdir -p /tmp/pwtest)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-menu.js\" .)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-menu2.js\" /tmp/pwtest/)",
+      "Bash(node verify-menu2.js)",
+      "Bash(grep -n \"to=\\\\\"/\\\\|to='/\\\\|href=\\\\\"/\\\\|Link to\" src/components/Header.js src/components/Footer.js src/components/Home.js src/components/QuickEnquiry.js src/components/*.js)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-routes.js\" /tmp/pwtest/)",
+      "Bash(node verify-routes.js)"
     ]
   }
 }
