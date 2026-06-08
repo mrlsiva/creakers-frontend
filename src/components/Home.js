@@ -33,6 +33,7 @@ const pad = (n) => String(n).padStart(2, '0');
 const Home = () => {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft);
   const [banner, setBanner] = useState(DEFAULT_BANNER);
+  const [bannerLoading, setBannerLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
   );
@@ -57,13 +58,25 @@ const Home = () => {
           setBanner(res.data);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setBannerLoading(false);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
   const heroImage = (isMobile && banner.mobile_image) ? banner.mobile_image : banner.image;
+
+  if (bannerLoading) {
+    return (
+      <div className="page-loader">
+        <span className="page-loader-icon">💥</span>
+        <span className="page-loader-spinner" />
+      </div>
+    );
+  }
 
   return (
     <div className="home">

@@ -313,6 +313,7 @@ body.menu-open {
   color: var(--white);
   padding: 90px 30px;
   text-align: center;
+      background-size: 100% 100%;
 }
 
 .hero-badge {
@@ -587,16 +588,41 @@ body.menu-open {
     padding: 15px 15px;
   }
 
+  .hero {
+    height: calc(100vh - var(--header-height, 0px));
+    background-size: 100% 100%;
+    padding: 6px 30px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-badge {
+    padding: 3px 10px;
+    font-size: 9px;
+    margin-bottom: 4px;
+  }
+
   .hero-content h1 {
-    font-size: 36px;
+    font-size: 24px;
+        margin-top: 12px;
+        margin-bottom: 0px;
   }
 
   .hero-subtitle {
-    font-size: 18px;
+    font-size: 16px;
+    margin-bottom: 12x;
   }
 
   .hero-content p {
-    font-size: 14px;
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+
+  .hero-cta .btn-lg {
+    padding: 4px 14px;
+    font-size: 10px;
   }
 
   .hero-cta {
@@ -614,20 +640,32 @@ body.menu-open {
   .festival-offer-card {
     flex-direction: column;
     text-align: center;
-    padding: 24px;
+    padding: 20px 16px;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .countdown {
     justify-content: center;
+    gap: 6px;
+    max-width: 100%;
   }
 
   .countdown-item {
-    min-width: 56px;
-    padding: 10px 12px;
+    min-width: 46px;
+    padding: 8px 6px;
   }
 
   .countdown-value {
-    font-size: 22px;
+    font-size: 18px;
+  }
+
+  .countdown-label {
+    font-size: 9px;
+  }
+
+  .countdown-sep {
+    font-size: 16px;
   }
 }
 
