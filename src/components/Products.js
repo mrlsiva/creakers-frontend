@@ -220,8 +220,10 @@ const Products = () => {
                       <h3 className="pl-card-name">{product.name}</h3>
                       <p className="pl-card-per">{product.per || product.unit || '1 Pkt'}</p>
                       <div className="pl-card-pricing">
-                        {mrp > 0 && <span className="pl-card-mrp">₹{mrp}</span>}
-                        <span className="pl-card-price">₹{ourPrice}</span>
+                        <div className="pl-card-price-row">
+                          <span className="pl-card-price">₹{ourPrice}</span>
+                          {mrp > 0 && <span className="pl-card-mrp">₹{mrp}</span>}
+                        </div>
                         {savings > 0 && <span className="pl-card-save">Save ₹{savings}</span>}
                         {discountType === 'flat' && discountValue > 0 && savings === 0 && (
                           <span className="pl-card-save">Save ₹{discountValue}</span>
