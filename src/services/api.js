@@ -17,99 +17,68 @@ const api = axios.create({
   },
 });
 
-// Sites
-export const getSites = async () => {
-  try {
-    const response = await api.get('/sites');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching sites:', error);
-    throw error;
+// In-memory cache: stores { data, expiresAt } per cache key
+const cache = {};
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const cached = async (key, fetcher) => {
+  const now = Date.now();
+  if (cache[key] && cache[key].expiresAt > now) {
+    return cache[key].data;
   }
+  const data = await fetcher();
+  cache[key] = { data, expiresAt: now + CACHE_TTL };
+  return data;
 };
 
-export const getSite = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching site:', error);
-    throw error;
-  }
+export const clearCache = (key) => {
+  if (key) delete cache[key];
+  else Object.keys(cache).forEach((k) => delete cache[k]);
 };
+
+// Sites
+export const getSites = () =>
+  cached('sites', () => api.get('/sites').then((r) => r.data));
+
+export const getSite = (slug = SITE_SLUG) =>
+  cached(`site:${slug}`, () => api.get(`/${slug}`).then((r) => r.data));
 
 // Home Banner
-export const getHomeBanner = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/home-banner`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching home banner:', error);
-    throw error;
-  }
-};
+export const getHomeBanner = (slug = SITE_SLUG) =>
+  cached(`home-banner:${slug}`, () => api.get(`/${slug}/home-banner`).then((r) => r.data));
 
 // Festival Offers
-export const getFestivalOffer = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/festival-offer`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching festival offer:', error);
-    throw error;
-  }
-};
+export const getFestivalOffer = (slug = SITE_SLUG) =>
+  cached(`festival-offer:${slug}`, () => api.get(`/${slug}/festival-offer`).then((r) => r.data));
 
 // Categories
-export const getCategories = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/categories`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-};
+export const getCategories = (slug = SITE_SLUG) =>
+  cached(`categories:${slug}`, () => api.get(`/${slug}/categories`).then((r) => r.data));
 
 // Products
-export const getProducts = async (filters = {}, slug = SITE_SLUG) => {
-  try {
-    const params = new URLSearchParams();
-    if (filters.category) params.append('category', filters.category);
-    if (filters.search) params.append('search', filters.search);
-    if (filters.per_page) params.append('per_page', filters.per_page);
-
-    const response = await api.get(`/${slug}/products?${params.toString()}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
+export const getProducts = (filters = {}, slug = SITE_SLUG) => {
+  const params = new URLSearchParams();
+  if (filters.category) params.append('category', filters.category);
+  if (filters.search) params.append('search', filters.search);
+  if (filters.per_page) params.append('per_page', filters.per_page);
+  const qs = params.toString();
+  return cached(`products:${slug}:${qs}`, () =>
+    api.get(`/${slug}/products?${qs}`).then((r) => r.data)
+  );
 };
 
-export const getProduct = async (slug, productSlug = '') => {
-  try {
-    const response = await api.get(`/${slug}/products/${productSlug}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    throw error;
-  }
-};
+export const getProduct = (slug, productSlug = '') =>
+  cached(`product:${slug}:${productSlug}`, () =>
+    api.get(`/${slug}/products/${productSlug}`).then((r) => r.data)
+  );
 
-export const getCategoryProducts = async (slug = SITE_SLUG, categorySlug = '', filters = {}) => {
-  try {
-    const params = new URLSearchParams();
-    if (filters.per_page) params.append('per_page', filters.per_page);
-
-    const response = await api.get(
-      `/${slug}/categories/${categorySlug}/products?${params.toString()}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching category products:', error);
-    throw error;
-  }
+export const getCategoryProducts = (slug = SITE_SLUG, categorySlug = '', filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.per_page) params.append('per_page', filters.per_page);
+  const qs = params.toString();
+  return cached(`cat-products:${slug}:${categorySlug}:${qs}`, () =>
+    api.get(`/${slug}/categories/${categorySlug}/products?${qs}`).then((r) => r.data)
+  );
 };
 
 // Orders
@@ -149,79 +118,32 @@ export const getOrder = async (slug = SITE_SLUG, orderNumber = '') => {
 };
 
 // Contact Info
-export const getContact = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/contact`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching contact info:', error);
-    throw error;
-  }
-};
+export const getContact = (slug = SITE_SLUG) =>
+  cached(`contact:${slug}`, () => api.get(`/${slug}/contact`).then((r) => r.data));
 
 // Content Pages
-export const getContentPages = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/content`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching content pages:', error);
-    throw error;
-  }
-};
+export const getContentPages = (slug = SITE_SLUG) =>
+  cached(`content:${slug}`, () => api.get(`/${slug}/content`).then((r) => r.data));
 
-export const getContentPage = async (slug = SITE_SLUG, key = '') => {
-  try {
-    const response = await api.get(`/${slug}/content/${key}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching content page:', error);
-    throw error;
-  }
-};
+export const getContentPage = (slug = SITE_SLUG, key = '') =>
+  cached(`content:${slug}:${key}`, () =>
+    api.get(`/${slug}/content/${key}`).then((r) => r.data)
+  );
 
 // Client Logos
-export const getClientLogos = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/client-logos`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching client logos:', error);
-    throw error;
-  }
-};
+export const getClientLogos = (slug = SITE_SLUG) =>
+  cached(`client-logos:${slug}`, () => api.get(`/${slug}/client-logos`).then((r) => r.data));
 
 // Order Steps
-export const getOrderSteps = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/order-steps`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching order steps:', error);
-    throw error;
-  }
-};
+export const getOrderSteps = (slug = SITE_SLUG) =>
+  cached(`order-steps:${slug}`, () => api.get(`/${slug}/order-steps`).then((r) => r.data));
 
 // Safety Tips
-export const getSafetyTips = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/safety-tips`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching safety tips:', error);
-    throw error;
-  }
-};
+export const getSafetyTips = (slug = SITE_SLUG) =>
+  cached(`safety-tips:${slug}`, () => api.get(`/${slug}/safety-tips`).then((r) => r.data));
 
 // Price Lists
-export const getPriceLists = async (slug = SITE_SLUG) => {
-  try {
-    const response = await api.get(`/${slug}/price-lists`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching price lists:', error);
-    throw error;
-  }
-};
+export const getPriceLists = (slug = SITE_SLUG) =>
+  cached(`price-lists:${slug}`, () => api.get(`/${slug}/price-lists`).then((r) => r.data));
 
 export default api;
