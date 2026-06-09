@@ -49,6 +49,17 @@ export const getHomeBanner = async (slug = SITE_SLUG) => {
   }
 };
 
+// Festival Offers
+export const getFestivalOffer = async (slug = SITE_SLUG) => {
+  try {
+    const response = await api.get(`/${slug}/festival-offer`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching festival offer:', error);
+    throw error;
+  }
+};
+
 // Categories
 export const getCategories = async (slug = SITE_SLUG) => {
   try {

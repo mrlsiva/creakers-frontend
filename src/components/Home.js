@@ -1,9 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { getHomeBanner, resolveAssetUrl } from '../services/api';
-
-const FESTIVAL_DATE = new Date('2026-11-08T00:00:00');
+import { Link } from 'react-router-dom';
+import { getHomeBanner, getFestivalOffer, getContentPage, resolveAssetUrl } from '../services/api';
 
 const MOBILE_QUERY = '(max-width: 768px)';
+
+
+const getBodyParagraphs = (html, limit = 2) => {
+  if (!html) return [];
+  return [...html.matchAll(/<p>([\s\S]*?)<\/p>/gi)]
+    .map((m) => m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim())
+    .filter(Boolean)
+    .slice(0, limit);
+};
+
+const getTimeLeft = (endsAt) => {
+  if (!endsAt) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  const diff = Math.max(0, new Date(endsAt).getTime() - Date.now());
+  return {
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / (1000 * 60)) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+};
+
+const isOfferExpired = (endsAt) => {
+  if (!endsAt) return false;
+  return new Date(endsAt).getTime() <= Date.now();
+};
 
 const DEFAULT_BANNER = {
   image: '',
@@ -18,22 +45,14 @@ const DEFAULT_BANNER = {
   ],
 };
 
-const getTimeLeft = () => {
-  const diff = Math.max(0, FESTIVAL_DATE.getTime() - Date.now());
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
-};
-
 const pad = (n) => String(n).padStart(2, '0');
 
 const Home = () => {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+  const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(null));
   const [banner, setBanner] = useState(DEFAULT_BANNER);
   const [bannerLoading, setBannerLoading] = useState(true);
+  const [festivalOffer, setFestivalOffer] = useState(null);
+  const [aboutUs, setAboutUs] = useState(null);
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
   );
@@ -46,11 +65,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const tick = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
-    return () => clearInterval(tick);
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
     getHomeBanner()
       .then((res) => {
@@ -58,7 +72,7 @@ const Home = () => {
           setBanner(res.data);
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         if (!cancelled) setBannerLoading(false);
       });
@@ -66,6 +80,50 @@ const Home = () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getFestivalOffer()
+      .then((res) => {
+        if (!cancelled && res?.success && res.data) {
+          setFestivalOffer(res.data);
+        }
+      })
+      .catch(() => { });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getContentPage(undefined, 'about-us')
+      .then((res) => {
+        if (!cancelled && res?.success && res.data) {
+          setAboutUs(res.data);
+        }
+      })
+      .catch(() => { });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!festivalOffer || !festivalOffer.ends_at || isOfferExpired(festivalOffer.ends_at)) {
+      setTimeLeft(getTimeLeft(null));
+      return undefined;
+    }
+
+    setTimeLeft(getTimeLeft(festivalOffer.ends_at));
+    const tick = setInterval(() => {
+      setTimeLeft(getTimeLeft(festivalOffer.ends_at));
+    }, 1000);
+
+    return () => clearInterval(tick);
+  }, [festivalOffer]);
 
   const heroImage = (isMobile && banner.mobile_image) ? banner.mobile_image : banner.image;
 
@@ -106,36 +164,95 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Festival Countdown Offer */}
-      <section className="festival-offer">
-        <div className="festival-offer-card">
-          <div className="festival-offer-info">
-            <h2>Diwali Festival Special Offer</h2>
-            <p>Exclusive deals ending soon. Hurry up!</p>
-            <a href="#products-page" className="btn btn-primary">Shop Festival Offers</a>
+      <section className="stripe-banner">
+        <img src="/images/stripe.png" alt="Stripe banner" />
+      </section>
+
+      {festivalOffer && !isOfferExpired(festivalOffer.ends_at) && (
+        <section className="festival-offer">
+          <div className="festival-offer-card">
+            <div className="festival-offer-info">
+              <h2>{festivalOffer.title || 'Festival Special Offer'}</h2>
+              {festivalOffer.sub_title && <p>{festivalOffer.sub_title}</p>}
+              {festivalOffer.button_url && festivalOffer.button_label && (
+                <a
+                  href={festivalOffer.button_url}
+                  target={festivalOffer.button_open_in_new_tab ? '_blank' : undefined}
+                  rel={festivalOffer.button_open_in_new_tab ? 'noopener noreferrer' : undefined}
+                  className="btn btn-primary btn-lg"
+                >
+                  {festivalOffer.button_label}
+                </a>
+              )}
+            </div>
+            {festivalOffer.ends_at && (
+              <div className="countdown">
+                <div className="countdown-item">
+                  <span className="countdown-value">{pad(timeLeft.days)}</span>
+                  <span className="countdown-label">Days</span>
+                </div>
+                <span className="countdown-sep">:</span>
+                <div className="countdown-item">
+                  <span className="countdown-value">{pad(timeLeft.hours)}</span>
+                  <span className="countdown-label">Hours</span>
+                </div>
+                <span className="countdown-sep">:</span>
+                <div className="countdown-item">
+                  <span className="countdown-value">{pad(timeLeft.minutes)}</span>
+                  <span className="countdown-label">Minutes</span>
+                </div>
+                <span className="countdown-sep">:</span>
+                <div className="countdown-item">
+                  <span className="countdown-value">{pad(timeLeft.seconds)}</span>
+                  <span className="countdown-label">Seconds</span>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="countdown">
-            <div className="countdown-item">
-              <span className="countdown-value">{pad(timeLeft.days)}</span>
-              <span className="countdown-label">Days</span>
+        </section>
+      )}
+      <section className="stripe-banner">
+        <img src="/images/stripe.png" alt="Stripe banner" />
+      </section>
+      {aboutUs && (
+        <section className="about-us" id="about">
+          <div className="about-us-inner">
+            <div className="about-us-content">
+              {aboutUs.tag && <span className="about-us-tag">{aboutUs.tag}</span>}
+              <h2 className="about-us-title">{aboutUs.title || 'About Us'}</h2>
+              {getBodyParagraphs(aboutUs.body).map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))}
+              {Array.isArray(aboutUs.features) && aboutUs.features.length > 0 && (
+                <div className="about-us-features">
+                  {aboutUs.features.map((feature, idx) => (
+                    <div className="about-us-feature" key={idx}>
+                      <span className="about-us-feature-icon">
+                        <i className={`fas fa-${feature.icon}`} />
+                      </span>
+                      <div>
+                        <h3>{feature.title}</h3>
+                        <p>{feature.subtitle}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Link to="/about-us" className="btn btn-primary btn-lg">
+                {aboutUs.button_label || 'Learn More About Us'}
+              </Link>
             </div>
-            <span className="countdown-sep">:</span>
-            <div className="countdown-item">
-              <span className="countdown-value">{pad(timeLeft.hours)}</span>
-              <span className="countdown-label">Hours</span>
-            </div>
-            <span className="countdown-sep">:</span>
-            <div className="countdown-item">
-              <span className="countdown-value">{pad(timeLeft.minutes)}</span>
-              <span className="countdown-label">Minutes</span>
-            </div>
-            <span className="countdown-sep">:</span>
-            <div className="countdown-item">
-              <span className="countdown-value">{pad(timeLeft.seconds)}</span>
-              <span className="countdown-label">Seconds</span>
-            </div>
+            {aboutUs.image && (
+              <div className="about-us-media">
+                <img src={resolveAssetUrl(aboutUs.image)} alt={aboutUs.title || 'About Us'} />
+              </div>
+            )}
           </div>
-        </div>
+        </section>
+      )}
+
+      <section className="stripe-banner">
+        <img src="/images/stripe.png" alt="Stripe banner" />
       </section>
 
       {/* Main Content */}
