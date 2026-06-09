@@ -145,7 +145,15 @@ const QuickEnquiry = () => {
     }
   };
 
-  const getImage = (product) => {
+  const formatDiscount = (pricing, mrp, ourPrice) => {
+  const type = pricing?.discount_type;
+  const value = pricing?.discount_value ?? pricing?.discount ?? (mrp - ourPrice);
+  if (!value || value <= 0) return null;
+  if (type === 'percentage') return `${value}%`;
+  return `₹${value}`;
+};
+
+const getImage = (product) => {
     const img = product.image || product.thumbnail || (product.images && product.images[0]);
     if (!img) return null;
     if (img.startsWith('http')) return img;
@@ -214,7 +222,7 @@ const QuickEnquiry = () => {
                 <th className="th-name">Product Name</th>
                 <th className="th-per">Per</th>
                 <th className="th-mrp">M.R.P (₹)</th>
-                <th className="th-dis">Discount (₹)</th>
+                <th className="th-dis">Discount</th>
                 <th className="th-price">Our Price (₹)</th>
                 <th className="th-qty">Qty</th>
                 <th className="th-total">Total (₹)</th>
@@ -252,12 +260,11 @@ const QuickEnquiry = () => {
 
                   const mrp = product.pricing?.mrp || product.mrp || 0;
                   const ourPrice = product.pricing?.our_price || product.price || 0;
-                  const discount = product.pricing?.discount || (mrp - ourPrice) || 0;
+                  const discountLabel = formatDiscount(product.pricing, mrp, ourPrice);
                   const per = product.per || product.unit || '1 Pkt';
                   const qty = getQty(product.id);
                   const rowTotal = ourPrice * qty;
                   const imgSrc = getImage(product);
-                  const hasDiscount = discount > 0;
 
                   rows.push(
                   <tr key={product.id} className={qty > 0 ? 'qe-row-active' : ''}>
@@ -284,9 +291,9 @@ const QuickEnquiry = () => {
                       {mrp > 0 ? <span className="qe-mrp">₹{mrp}</span> : <span className="qe-na">—</span>}
                     </td>
                     <td className="td-dis">
-                      {hasDiscount ? (
-                        <span className="qe-discount">₹{discount}</span>
-                      ) : <span className="qe-na">—</span>}
+                      {discountLabel
+                        ? <span className="qe-discount">{discountLabel}</span>
+                        : <span className="qe-na">—</span>}
                     </td>
                     <td className="td-price">
                       <span className="qe-our-price">₹{ourPrice}</span>
@@ -352,7 +359,7 @@ const QuickEnquiry = () => {
             }
             const mrp = product.pricing?.mrp || product.mrp || 0;
             const ourPrice = product.pricing?.our_price || product.price || 0;
-            const discount = product.pricing?.discount || (mrp - ourPrice) || 0;
+            const discountLabel = formatDiscount(product.pricing, mrp, ourPrice);
             const per = product.per || product.unit || '1 Pkt';
             const qty = getQty(product.id);
             const rowTotal = ourPrice * qty;
@@ -379,7 +386,7 @@ const QuickEnquiry = () => {
                 </div>
                 <div className="qe-mc-pricing">
                   {mrp > 0 && <div className="qe-mc-price-item"><span>MRP</span><span className="qe-mrp">₹{mrp}</span></div>}
-                  {discount > 0 && <div className="qe-mc-price-item"><span>Discount</span><span className="qe-discount">₹{discount}</span></div>}
+                  {discountLabel && <div className="qe-mc-price-item"><span>Discount</span><span className="qe-discount">{discountLabel}</span></div>}
                   <div className="qe-mc-price-item"><span>Price</span><span className="qe-our-price">₹{ourPrice}</span></div>
                 </div>
                 <div className="qe-mc-footer">

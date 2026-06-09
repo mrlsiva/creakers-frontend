@@ -190,7 +190,11 @@ const Products = () => {
                 const mrp = product.pricing?.mrp || 0;
                 const ourPrice = product.pricing?.our_price || product.price || 0;
                 const savings = product.pricing?.savings || (mrp > ourPrice ? mrp - ourPrice : 0);
-                const discountPct = product.pricing?.discount_value || (mrp > 0 ? Math.round((savings / mrp) * 100) : 0);
+                const discountType = product.pricing?.discount_type;
+                const discountValue = product.pricing?.discount_value;
+                const discountBadge = discountValue > 0
+                  ? (discountType === 'flat' ? `₹${discountValue} OFF` : `${discountValue}% OFF`)
+                  : (savings > 0 && mrp > 0 ? `${Math.round((savings / mrp) * 100)}% OFF` : null);
                 const imgSrc = getImage(product);
 
                 return (
@@ -207,8 +211,8 @@ const Products = () => {
                           </svg>
                         </div>
                       )}
-                      {discountPct > 0 && (
-                        <span className="pl-discount-badge">{discountPct}% OFF</span>
+                      {discountBadge && (
+                        <span className="pl-discount-badge">{discountBadge}</span>
                       )}
                     </div>
                     <div className="pl-card-body">
@@ -219,6 +223,9 @@ const Products = () => {
                         {mrp > 0 && <span className="pl-card-mrp">₹{mrp}</span>}
                         <span className="pl-card-price">₹{ourPrice}</span>
                         {savings > 0 && <span className="pl-card-save">Save ₹{savings}</span>}
+                        {discountType === 'flat' && discountValue > 0 && savings === 0 && (
+                          <span className="pl-card-save">Save ₹{discountValue}</span>
+                        )}
                       </div>
                     </div>
                   </div>
