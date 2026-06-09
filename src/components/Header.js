@@ -13,7 +13,6 @@ const stripHtml = (html) => {
 const Header = ({ site }) => {
   const { pathname } = useLocation();
   const isHome = pathname === '/home';
-  const anchor = (hash) => isHome ? hash : `/home${hash}`;
   const [bannerText, setBannerText] = useState(DEFAULT_BANNER_TEXT);
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -89,13 +88,13 @@ const Header = ({ site }) => {
         >
           <ul className="nav-links">
             <li><Link to="/home" className={isHome ? 'nav-active' : ''}>Home</Link></li>
-            <li><a href={anchor('#about')}>About</a></li>
+            <li><Link to="/about-us" className={pathname === '/about-us' ? 'nav-active' : ''}>About</Link></li>
             <li>
               <Link to="/products" className={pathname === '/products' ? 'nav-active' : ''}>
                 Categories
               </Link>
             </li>
-            <li><a href={anchor('#how-to-order')}>How to Order</a></li>
+            <li><Link to="/how-to-order" className={pathname === '/how-to-order' ? 'nav-active' : ''}>How to Order</Link></li>
             <li>
               <Link to="/contact" className={pathname === '/contact' ? 'nav-active' : ''}>Contact</Link>
             </li>

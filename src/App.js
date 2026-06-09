@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './components/Home';
 import AboutUs from './components/AboutUs';
+import HowToOrder from './components/HowToOrder';
 import Products from './components/Products';
 import QuickEnquiry from './components/QuickEnquiry';
 import OrderTrack from './components/OrderTrack';
@@ -84,6 +85,7 @@ function App() {
           <Route path="/" element={<QuickEnquiry />} />
           <Route path="/home" element={<Home />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/how-to-order" element={<HowToOrder />} />
           <Route path="/products" element={<Products />} />
           <Route path="/order-track" element={<OrderTrack />} />
           <Route path="/contact" element={<Contact />} />
