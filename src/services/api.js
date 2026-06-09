@@ -17,23 +17,49 @@ const api = axios.create({
   },
 });
 
-// In-memory cache: stores { data, expiresAt } per cache key
-const cache = {};
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_PREFIX = 'crk_';
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes in localStorage
+const mem = {};                    // in-memory: survives navigation, cleared on page refresh
 
-const cached = async (key, fetcher) => {
-  const now = Date.now();
-  if (cache[key] && cache[key].expiresAt > now) {
-    return cache[key].data;
-  }
+const lsRead = (key) => {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key);
+    if (!raw) return null;
+    const { data, expiresAt } = JSON.parse(raw);
+    if (Date.now() > expiresAt) { localStorage.removeItem(CACHE_PREFIX + key); return null; }
+    return data;
+  } catch { return null; }
+};
+
+const lsWrite = (key, data, ttl = CACHE_TTL) => {
+  try {
+    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ data, expiresAt: Date.now() + ttl }));
+  } catch {} // ignore storage quota errors
+};
+
+const cached = async (key, fetcher, ttl = CACHE_TTL) => {
+  // 1. memory hit (fastest — survives in-app navigation)
+  if (mem[key]) return mem[key];
+  // 2. localStorage hit (survives page refresh)
+  const stored = lsRead(key);
+  if (stored) { mem[key] = stored; return stored; }
+  // 3. fetch from API, then persist both layers
   const data = await fetcher();
-  cache[key] = { data, expiresAt: now + CACHE_TTL };
+  mem[key] = data;
+  lsWrite(key, data, ttl);
   return data;
 };
 
 export const clearCache = (key) => {
-  if (key) delete cache[key];
-  else Object.keys(cache).forEach((k) => delete cache[k]);
+  if (key) {
+    delete mem[key];
+    localStorage.removeItem(CACHE_PREFIX + key);
+  } else {
+    Object.keys(mem).forEach((k) => delete mem[k]);
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(CACHE_PREFIX))
+      .forEach((k) => localStorage.removeItem(k));
+  }
 };
 
 // Sites
@@ -51,34 +77,26 @@ export const getHomeBanner = (slug = SITE_SLUG) =>
 export const getFestivalOffer = (slug = SITE_SLUG) =>
   cached(`festival-offer:${slug}`, () => api.get(`/${slug}/festival-offer`).then((r) => r.data));
 
-// Categories
+// Categories — short TTL since product counts change with new products
 export const getCategories = (slug = SITE_SLUG) =>
-  cached(`categories:${slug}`, () => api.get(`/${slug}/categories`).then((r) => r.data));
+  cached(`categories:${slug}`, () => api.get(`/${slug}/categories`).then((r) => r.data), 2 * 60 * 1000);
 
-// Products
+// Products — always fresh, never cached
 export const getProducts = (filters = {}, slug = SITE_SLUG) => {
   const params = new URLSearchParams();
   if (filters.category) params.append('category', filters.category);
   if (filters.search) params.append('search', filters.search);
   if (filters.per_page) params.append('per_page', filters.per_page);
-  const qs = params.toString();
-  return cached(`products:${slug}:${qs}`, () =>
-    api.get(`/${slug}/products?${qs}`).then((r) => r.data)
-  );
+  return api.get(`/${slug}/products?${params.toString()}`).then((r) => r.data);
 };
 
 export const getProduct = (slug, productSlug = '') =>
-  cached(`product:${slug}:${productSlug}`, () =>
-    api.get(`/${slug}/products/${productSlug}`).then((r) => r.data)
-  );
+  api.get(`/${slug}/products/${productSlug}`).then((r) => r.data);
 
 export const getCategoryProducts = (slug = SITE_SLUG, categorySlug = '', filters = {}) => {
   const params = new URLSearchParams();
   if (filters.per_page) params.append('per_page', filters.per_page);
-  const qs = params.toString();
-  return cached(`cat-products:${slug}:${categorySlug}:${qs}`, () =>
-    api.get(`/${slug}/categories/${categorySlug}/products?${qs}`).then((r) => r.data)
-  );
+  return api.get(`/${slug}/categories/${categorySlug}/products?${params.toString()}`).then((r) => r.data);
 };
 
 // Orders
@@ -145,5 +163,25 @@ export const getSafetyTips = (slug = SITE_SLUG) =>
 // Price Lists
 export const getPriceLists = (slug = SITE_SLUG) =>
   cached(`price-lists:${slug}`, () => api.get(`/${slug}/price-lists`).then((r) => r.data));
+
+// Prefetch all static data in one parallel burst.
+// Call once on app startup — populates both memory + localStorage so
+// every page/component gets instant data with no individual loading waits.
+export const prefetchAll = (slug = SITE_SLUG) =>
+  Promise.allSettled([
+    getSite(slug),
+    getHomeBanner(slug),
+    getFestivalOffer(slug),
+    getCategories(slug),
+    getContact(slug),
+    getOrderSteps(slug),
+    getContentPage(slug, 'about-us'),
+    getContentPage(slug, 'banner-scrolling-text'),
+  ]);
+
+export const syncData = async (slug = SITE_SLUG) => {
+  clearCache();
+  return prefetchAll(slug);
+};
 
 export default api;

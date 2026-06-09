@@ -12,7 +12,7 @@ import OrderTrack from './components/OrderTrack';
 import Contact from './components/Contact';
 import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
-import { getSite, resolveAssetUrl } from './services/api';
+import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
 
 function App() {
   const [site, setSite] = useState(null);
@@ -21,6 +21,9 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    // prefetchAll fires all static API calls in parallel and populates cache.
+    // getSite() resolves instantly from cache since prefetchAll includes it.
+    prefetchAll();
     getSite()
       .then((res) => {
         if (cancelled) return;

@@ -189,7 +189,7 @@ const QuickEnquiry = () => {
         </div>
       )}
 
-      {/* Product Table */}
+      {/* Product Table / Cards */}
       <div className="qe-table-wrap" style={{ paddingBottom: cartCount > 0 ? '100px' : '30px' }}>
         {loading ? (
           <div className="qe-loading">
@@ -327,6 +327,80 @@ const QuickEnquiry = () => {
             </tbody>
           </table>
         )}
+
+        {/* Mobile card view */}
+        {!loading && (() => {
+          const sorted = [...filteredProducts].sort((a, b) => {
+            const aName = a.category?.name || a.category_name || '';
+            const bName = b.category?.name || b.category_name || '';
+            return aName.localeCompare(bName);
+          });
+          const cards = [];
+          let lastCatKey = undefined;
+          sorted.forEach(product => {
+            const catKey = product.category?.id ?? product.category_id ?? '__none__';
+            const catName = product.category?.name || product.category_name || '';
+            if (catKey !== lastCatKey) {
+              lastCatKey = catKey;
+              if (catName) {
+                cards.push(
+                  <div key={`mcat-${catKey}`} className="qe-mobile-cat">
+                    {catName}
+                  </div>
+                );
+              }
+            }
+            const mrp = product.pricing?.mrp || product.mrp || 0;
+            const ourPrice = product.pricing?.our_price || product.price || 0;
+            const discount = product.pricing?.discount || (mrp - ourPrice) || 0;
+            const per = product.per || product.unit || '1 Pkt';
+            const qty = getQty(product.id);
+            const rowTotal = ourPrice * qty;
+            const imgSrc = getImage(product);
+            cards.push(
+              <div key={`mc-${product.id}`} className={`qe-mobile-card${qty > 0 ? ' qe-mobile-card-active' : ''}`}>
+                <div className="qe-mc-top">
+                  <div className="qe-mc-img-wrap">
+                    {imgSrc ? (
+                      <img src={imgSrc} alt={product.name} className="qe-mc-img" loading="lazy" />
+                    ) : (
+                      <div className="qe-mc-img-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="qe-mc-info">
+                    <span className="qe-mc-name">{product.name}</span>
+                    <span className="qe-mc-per">Per: {per}</span>
+                  </div>
+                </div>
+                <div className="qe-mc-pricing">
+                  {mrp > 0 && <div className="qe-mc-price-item"><span>MRP</span><span className="qe-mrp">₹{mrp}</span></div>}
+                  {discount > 0 && <div className="qe-mc-price-item"><span>Discount</span><span className="qe-discount">₹{discount}</span></div>}
+                  <div className="qe-mc-price-item"><span>Price</span><span className="qe-our-price">₹{ourPrice}</span></div>
+                </div>
+                <div className="qe-mc-footer">
+                  <div className="qe-qty-control">
+                    <button className="qe-qty-btn" onClick={() => decrement(product.id)} disabled={qty === 0} aria-label="Decrease">−</button>
+                    <input
+                      className="qe-qty-input"
+                      type="number" min="0"
+                      value={qty === 0 ? '' : qty}
+                      placeholder="0"
+                      onChange={e => setQty(product.id, e.target.value)}
+                    />
+                    <button className="qe-qty-btn qe-qty-add" onClick={() => increment(product.id)} aria-label="Increase">+</button>
+                  </div>
+                  {qty > 0 && <span className="qe-mc-total">₹{rowTotal}</span>}
+                </div>
+              </div>
+            );
+          });
+          return <div className="qe-mobile-list">{cards}</div>;
+        })()}
       </div>
 
       {/* Fixed Bottom Cart Bar */}
