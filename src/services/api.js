@@ -174,6 +174,7 @@ export const prefetchAll = (slug = SITE_SLUG) =>
     getFestivalOffer(slug),
     getCategories(slug),
     getContact(slug),
+    getClientLogos(slug),
     getOrderSteps(slug),
     getContentPage(slug, 'about-us'),
     getContentPage(slug, 'banner-scrolling-text'),

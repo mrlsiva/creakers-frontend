@@ -1,117 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getContact } from '../services/api';
+import { getContact, getCategories, getSite, getPriceLists, resolveAssetUrl } from '../services/api';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
 const Footer = () => {
   const [contact, setContact] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [site, setSite] = useState(null);
+  const [priceListUrl, setPriceListUrl] = useState('');
 
   useEffect(() => {
     getContact()
-      .then(res => { if (res.success) setContact(res.data); })
-      .catch(() => {});
+      .then(res => { if (res?.success) setContact(res.data); })
+      .catch(() => { });
+    getCategories()
+      .then(res => { if (res?.success && res.data) setCategories(res.data.slice(0, 8)); })
+      .catch(() => { });
+    getSite()
+      .then(res => { if (res?.success && res.data) setSite(res.data); })
+      .catch(() => { });
+    getPriceLists()
+      .then(res => {
+        const url = res?.data?.[0]?.url;
+        if (url) setPriceListUrl(resolveAssetUrl(url));
+      })
+      .catch(() => { });
   }, []);
 
-  const phones      = contact?.phones || [];
-  const email       = contact?.email || null;
-  const address     = contact?.address || null;
-  const openingTime = contact?.opening_time || null;
   const socialLinks = contact?.social_links || [];
-  const mapUrl      = contact?.map_embed_url || null;
+  const logo = site?.logo ? resolveAssetUrl(site.logo) : null;
+  const siteName = site?.name || 'Vigo Crackers';
 
-  const waLink   = socialLinks.find(s => s.label?.toLowerCase().replace(/\s/g,'').includes('whats'));
-  const waNumber = waLink ? waLink.url?.replace(/\D/g,'') : (phones[0] ? phones[0].replace(/\D/g,'') : null);
+  const quickLinks = [
+    { label: 'Home', to: '/home' },
+    { label: 'About Us', to: '/about-us' },
+    { label: 'Categories', to: '/products' },
+    { label: 'How to Order', to: '/how-to-order' },
+    { label: 'Safety Tips', to: '/safety-tips' },
+    { label: 'Price List', to: '/price-list' },
+    { label: 'Visit Store', to: '/contact' },
+  ];
 
   return (
-    <footer className="footer">
-      <div className="footer-content">
-        {/* Brand */}
-        <div className="footer-section">
-          <h3>VIGO CREAKERS</h3>
-          <p>Quality fireworks and crackers for your Diwali celebrations. Trusted by thousands of customers across India.</p>
+    <footer className="footer-new">
+      <section className="stripe-banner">
+        <img src="/images/stripe.png" alt="Stripe banner" />
+      </section>
+      <div className="footer-new-content">
+        {/* Brand column */}
+        <div className="footer-new-brand">
+          <div className="footer-new-logo">
+            {logo ? (
+              <img src={logo} alt={siteName} className="footer-new-logo-img" />
+            ) : (
+              <span className="footer-new-logo-icon">💥</span>
+            )}
+            <span className="footer-new-logo-name">{siteName}</span>
+          </div>
+          <p className="footer-new-desc">
+            Your trusted partner for premium quality fireworks and crackers since 1990.
+            Making celebrations memorable across India.
+          </p>
           {socialLinks.length > 0 && (
-            <div className="social-links">
-              {socialLinks.map((s, i) => (
-                <a
-                  key={i}
-                  href={s.url?.startsWith('http') ? s.url : `https://${s.url}`}
-                  title={s.label}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {s.icon ? (
-                    <img
-                      src={s.icon.startsWith('http') ? s.icon : `${API_BASE}${s.icon}`}
-                      alt={s.label}
-                      style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: 4 }}
-                    />
-                  ) : s.label}
-                </a>
-              ))}
+            <div className="footer-new-social-wrap">
+              <span className="footer-new-social-label">Follow Us</span>
+              <div className="footer-new-social-icons">
+                {socialLinks.map((s, i) => (
+                  <a
+                    key={i}
+                    href={s.url?.startsWith('http') ? s.url : `https://${s.url}`}
+                    title={s.label}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="footer-new-social-link"
+                  >
+                    {s.icon ? (
+                      <img
+                        src={s.icon.startsWith('http') ? s.icon : `${API_BASE}${s.icon}`}
+                        alt={s.label}
+                        className="footer-new-social-icon-img"
+                      />
+                    ) : (
+                      <span className="footer-new-social-fallback">{s.label?.charAt(0)}</span>
+                    )}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
         {/* Quick Links */}
-        <div className="footer-section">
-          <h3>Quick Links</h3>
-          <ul style={{ listStyle: 'none' }}>
-            <li><Link to="/products">Products</Link></li>
-            <li><Link to="/">Quick Enquiry</Link></li>
-            <li><Link to="/order-track">Order Tracking</Link></li>
-            <li><Link to="/contact">Contact Us</Link></li>
+        <div className="footer-new-col">
+          <h4 className="footer-new-col-title">Quick Links</h4>
+          <ul className="footer-new-list">
+            {quickLinks.map((lnk, i) => (
+              <li key={i}>
+                <Link to={lnk.to} className="footer-new-link">{lnk.label}</Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Contact — only show rows that have data */}
-        <div className="footer-section">
-          <h3>Contact Us</h3>
-          {address && (
-            <p>
-              <strong>Address:</strong><br />
-              {mapUrl
-                ? <a href={mapUrl} target="_blank" rel="noreferrer">{address}</a>
-                : address}
-            </p>
-          )}
-          {phones.length > 0 && (
-            <p>
-              <strong>Phone:</strong><br />
-              {phones.map((p, i) => (
-                <span key={i}>
-                  <a href={`tel:${p.replace(/\D/g,'')}`}>{p}</a>
-                  {i < phones.length - 1 && ', '}
-                </span>
-              ))}
-            </p>
-          )}
-          {email && (
-            <p>
-              <strong>Email:</strong><br />
-              <a href={`mailto:${email}`}>{email}</a>
-            </p>
-          )}
-          {openingTime && (
-            <p style={{ marginTop: '10px', fontSize: '12px' }}>
-              <strong>Hours:</strong> {openingTime}
-            </p>
-          )}
-          {waNumber && (
-            <a
-              href={`https://wa.me/${waNumber}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '12px', background: '#25d366', color: '#fff', padding: '7px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}
-            >
-              💬 WhatsApp Us
-            </a>
-          )}
+        {/* Product Categories */}
+        <div className="footer-new-col">
+          <h4 className="footer-new-col-title">Product Categories</h4>
+          <ul className="footer-new-list">
+            {categories.length > 0 ? (
+              categories.map((cat, i) => (
+                <li key={i}>
+                  <Link to="/products" className="footer-new-link">{cat.name}</Link>
+                </li>
+              ))
+            ) : (
+              ['Rockets', 'Ground Chakkars', 'Sparklers', 'Aerial Shots', 'Flower Pots', 'Kids Special', 'Premium Gift Boxes', 'Crackers'].map((c, i) => (
+                <li key={i}>
+                  <Link to="/products" className="footer-new-link">{c}</Link>
+                </li>
+              ))
+            )}
+          </ul>
         </div>
       </div>
 
-      <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} VIGO CREAKERS. All rights reserved. | Celebrating Diwali with Quality &amp; Safety 🎆</p>
+      <div className="footer-new-bottom">
+        <span className="footer-new-copy">
+          © {new Date().getFullYear()} {siteName}. All rights reserved. | Crafted with premium quality since 1990.
+        </span>
+        <div className="footer-new-policies">
+          <Link to="/terms-conditions" className="footer-new-policy-link">Terms &amp; Conditions</Link>
+        </div>
       </div>
     </footer>
   );

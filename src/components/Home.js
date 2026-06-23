@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getHomeBanner, getFestivalOffer, resolveAssetUrl } from '../services/api';
 import AboutSection from './AboutSection';
 import HowToOrder from './HowToOrder';
+import HomeBottomSections from './HomeBottomSections';
 
 const MOBILE_QUERY = '(max-width: 768px)';
 
@@ -196,6 +197,7 @@ const Home = () => {
         <img src="/images/stripe.png" alt="Stripe banner" />
       </section>
       <HowToOrder />
+      <HomeBottomSections />
     </div>
   );
 };

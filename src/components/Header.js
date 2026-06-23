@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getContentPage, resolveAssetUrl } from '../services/api';
+import { getContentPage, getPriceLists, resolveAssetUrl } from '../services/api';
 
 const DEFAULT_BANNER_TEXT = '🎆 Diwali Booking Started...! | 80% Discount offer 🎆 | Minimum order for Tamil Nadu ₹3,000/- | Other states ₹5,000/-';
 
@@ -48,7 +48,7 @@ const Header = ({ site }) => {
           setBannerText(text);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       cancelled = true;
     };
@@ -96,21 +96,34 @@ const Header = ({ site }) => {
                 </Link>
               </li>
               <li><Link to="/how-to-order" className={pathname === '/how-to-order' ? 'nav-active' : ''}>How to Order</Link></li>
+              <li><Link to="/safety-tips" className={pathname === '/safety-tips' ? 'nav-active' : ''}>Safety Tips</Link></li>
+              <li>
+                <Link className="nav-pdf-btn"
+                  onClick={async () => {
+                    const res = await getPriceLists();
+                    const url = res?.data?.[0]?.url;
+                    if (url) window.open(resolveAssetUrl(url), '_blank');
+                  }}
+                >
+                  Price List
+
+                </Link>
+              </li>
               <li>
                 <Link to="/contact" className={pathname === '/contact' ? 'nav-active' : ''}>Contact</Link>
               </li>
             </ul>
             <div className="header-actions header-actions-mobile">
-              <a href="tel:+919876543210" className="call-now">
-                <span aria-hidden="true">📞</span> Call Now
-              </a>
+              <Link to="/order-track" className="call-now">
+                <span aria-hidden="true">📦</span> Order Track
+              </Link>
               <Link to="/" className="btn btn-order-now">Order Now</Link>
             </div>
           </nav>
           <div className="header-actions header-actions-desktop">
-            <a href="tel:+919876543210" className="call-now">
-              <span aria-hidden="true">📞</span> Call Now
-            </a>
+            <Link to="/order-track" className="call-now">
+              <span aria-hidden="true">📦</span> Order Track
+            </Link>
             <Link to="/" className="btn btn-order-now">Order Now</Link>
           </div>
         </div>

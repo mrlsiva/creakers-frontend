@@ -10,6 +10,9 @@ import Products from './components/Products';
 import QuickEnquiry from './components/QuickEnquiry';
 import OrderTrack from './components/OrderTrack';
 import Contact from './components/Contact';
+import SafetyTips from './components/SafetyTips';
+import PriceList from './components/PriceList';
+import TermsConditions from './components/TermsConditions';
 import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
 import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
@@ -92,6 +95,9 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/order-track" element={<OrderTrack />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/safety-tips" element={<SafetyTips />} />
+          <Route path="/price-list" element={<PriceList />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
         </Routes>
       </main>
       <Footer />
