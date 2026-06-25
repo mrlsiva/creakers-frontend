@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { getContentPage } from '../services/api';
+import { getContentPage, resolveAssetUrl } from '../services/api';
 
 const STORAGE_KEY = 'vigo_popup_shown';
 
 const WelcomePopup = () => {
   const [content, setContent] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     if (sessionStorage.getItem(STORAGE_KEY)) return;
@@ -15,6 +16,15 @@ const WelcomePopup = () => {
       .then((res) => {
         if (cancelled) return;
         if (res?.success && res.data?.body) {
+          if (res.data.image) {
+            const imageUrl = resolveAssetUrl(res.data.image);
+            const preload = document.createElement('link');
+            preload.rel = 'preload';
+            preload.as = 'image';
+            preload.href = imageUrl;
+            preload.fetchPriority = 'high';
+            document.head.appendChild(preload);
+          }
           setContent(res.data);
           setVisible(true);
         }
@@ -39,7 +49,21 @@ const WelcomePopup = () => {
           <h3>{content.title}</h3>
           <button type="button" className="site-popup-close" aria-label="Close" onClick={close}>✕</button>
         </div>
-        <div className="site-popup-body" dangerouslySetInnerHTML={{ __html: content.body }} />
+        <div className="site-popup-content">
+          <div className="site-popup-image">
+            {!imageLoaded && <div className="site-popup-image-skeleton" />}
+            <img
+              src={content.image ? resolveAssetUrl(content.image) : '/images/vigo-logo.svg'}
+              alt={content.title || 'Vigo Creackers'}
+              fetchPriority="high"
+              loading="eager"
+              decoding="sync"
+              className={imageLoaded ? 'is-loaded' : ''}
+              onLoad={() => setImageLoaded(true)}
+            />
+          </div>
+          <div className="site-popup-body" dangerouslySetInnerHTML={{ __html: content.body }} />
+        </div>
       </div>
     </div>
   );
