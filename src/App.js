@@ -68,6 +68,12 @@ function App() {
   if (siteLoading) {
     return (
       <div className="page-loader">
+        <span className="firework firework-1" />
+        <span className="firework firework-2" />
+        <span className="firework firework-3" />
+        <span className="firework firework-4" />
+        <span className="firework firework-5" />
+        <span className="firework firework-6" />
         <img
           src={site?.logo ? resolveAssetUrl(site.logo) : '/images/logo.svg'}
           alt={site?.name || 'Logo'}
