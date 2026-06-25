@@ -68,12 +68,12 @@ function App() {
   if (siteLoading) {
     return (
       <div className="page-loader">
-        {site?.logo ? (
-          <img src={resolveAssetUrl(site.logo)} alt={site.name || 'Logo'} className="page-loader-logo" />
-        ) : (
-          <span className="page-loader-icon">💥</span>
-        )}
-        <span className="page-loader-spinner" />
+        <img
+          src={site?.logo ? resolveAssetUrl(site.logo) : '/images/logo.svg'}
+          alt={site?.name || 'Logo'}
+          className="page-loader-logo"
+        />
+        {/* <span className="page-loader-spinner" /> */}
       </div>
     );
   }

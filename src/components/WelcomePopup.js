@@ -53,7 +53,7 @@ const WelcomePopup = () => {
           <div className="site-popup-image">
             {!imageLoaded && <div className="site-popup-image-skeleton" />}
             <img
-              src={content.image ? resolveAssetUrl(content.image) : '/images/vigo-logo.svg'}
+              src={content.image ? resolveAssetUrl(content.image) : '/images/logo.svg'}
               alt={content.title || 'Vigo Creackers'}
               fetchPriority="high"
               loading="eager"
