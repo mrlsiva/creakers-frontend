@@ -107,6 +107,15 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <a
+        className="whatsapp-float"
+        href="https://api.whatsapp.com/send?phone=919486046411"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on WhatsApp"
+      >
+        <i className="fab fa-whatsapp" />
+      </a>
     </BrowserRouter>
   );
 }

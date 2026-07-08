@@ -309,6 +309,32 @@ body.menu-open {
   cursor: pointer;
 }
 
+.whatsapp-float {
+  position: fixed;
+  left: 20px;
+  bottom: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: var(--white, #fff);
+  font-size: 30px;
+  transition: transform 0.2s ease;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.08);
+  color: var(--white, #fff);
+}
+
 .call-now {
   display: flex;
   align-items: center;
