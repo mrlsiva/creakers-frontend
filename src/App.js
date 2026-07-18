@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './index.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -16,6 +16,16 @@ import TermsConditions from './components/TermsConditions';
 import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
 import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const [site, setSite] = useState(null);
@@ -90,12 +100,14 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <WelcomePopup />
       <Header site={site} />
       <main className="main">
         <Routes>
-          <Route path="/" element={<QuickEnquiry />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/order" element={<QuickEnquiry />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/how-to-order" element={<HowToOrder />} />
           <Route path="/products" element={<Products />} />
