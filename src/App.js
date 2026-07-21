@@ -15,6 +15,7 @@ import PriceList from './components/PriceList';
 import TermsConditions from './components/TermsConditions';
 import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
+import RefreshCache from './components/RefreshCache';
 import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
 
 function App() {
@@ -98,6 +99,7 @@ function App() {
           <Route path="/safety-tips" element={<SafetyTips />} />
           <Route path="/price-list" element={<PriceList />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/clear" element={<RefreshCache />} />
         </Routes>
       </main>
       <Footer />

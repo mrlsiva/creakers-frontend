@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://portal.ghillicrackers.com/api';
 const ASSET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 const SITE_SLUG = 'vigo';
 
@@ -34,7 +34,7 @@ const lsRead = (key) => {
 const lsWrite = (key, data, ttl = CACHE_TTL) => {
   try {
     localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ data, expiresAt: Date.now() + ttl }));
-  } catch {} // ignore storage quota errors
+  } catch { } // ignore storage quota errors
 };
 
 const cached = async (key, fetcher, ttl = CACHE_TTL) => {
