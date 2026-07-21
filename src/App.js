@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './index.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -17,6 +17,16 @@ import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
 import RefreshCache from './components/RefreshCache';
 import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const [site, setSite] = useState(null);
@@ -69,6 +79,12 @@ function App() {
   if (siteLoading) {
     return (
       <div className="page-loader">
+        <span className="firework firework-1" />
+        <span className="firework firework-2" />
+        <span className="firework firework-3" />
+        <span className="firework firework-4" />
+        <span className="firework firework-5" />
+        <span className="firework firework-6" />
         <img
           src={site?.logo ? resolveAssetUrl(site.logo) : '/images/logo.svg'}
           alt={site?.name || 'Logo'}
@@ -85,12 +101,14 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <WelcomePopup />
       <Header site={site} />
       <main className="main">
         <Routes>
-          <Route path="/" element={<QuickEnquiry />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/order" element={<QuickEnquiry />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/how-to-order" element={<HowToOrder />} />
           <Route path="/products" element={<Products />} />
@@ -103,6 +121,15 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <a
+        className="whatsapp-float"
+        href="https://api.whatsapp.com/send?phone=919486046411"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on WhatsApp"
+      >
+        <i className="fab fa-whatsapp" />
+      </a>
     </BrowserRouter>
   );
 }
