@@ -379,6 +379,30 @@ body.menu-open {
   }
 }
 
+.btn-order-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cracker-fuse {
+  display: inline-block;
+  animation: cracker-fuse-flicker 0.6s ease-in-out infinite;
+}
+
+@keyframes cracker-fuse-flicker {
+  0%, 100% {
+    transform: scale(1) rotate(-6deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15) rotate(6deg);
+    opacity: 0.75;
+  }
+}
+
 .header-actions-mobile {
   display: none;
 }

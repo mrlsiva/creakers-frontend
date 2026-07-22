@@ -164,6 +164,9 @@ export const getSafetyTips = (slug = SITE_SLUG) =>
 export const getPriceLists = (slug = SITE_SLUG) =>
   cached(`price-lists:${slug}`, () => api.get(`/${slug}/price-lists`).then((r) => r.data));
 
+export const getPriceListDownloadUrl = (slug = SITE_SLUG) =>
+  `${API_BASE_URL}/${slug}/price-list/download`;
+
 // Prefetch all static data in one parallel burst.
 // Call once on app startup — populates both memory + localStorage so
 // every page/component gets instant data with no individual loading waits.
