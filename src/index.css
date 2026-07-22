@@ -355,6 +355,28 @@ body.menu-open {
   color: var(--dark-red);
   padding: 10px 26px;
   border-radius: 24px;
+  animation: btn-shake 2.5s ease-in-out infinite;
+}
+
+@keyframes btn-shake {
+  0%, 88%, 100% {
+    transform: translateX(0) rotate(0);
+  }
+  89% {
+    transform: translateX(-3px) rotate(-4deg);
+  }
+  91% {
+    transform: translateX(3px) rotate(4deg);
+  }
+  93% {
+    transform: translateX(-3px) rotate(-3deg);
+  }
+  95% {
+    transform: translateX(3px) rotate(3deg);
+  }
+  97% {
+    transform: translateX(-2px) rotate(-2deg);
+  }
 }
 
 .header-actions-mobile {
@@ -710,7 +732,7 @@ body.menu-open {
 /* Step cards */
 .hto-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 60px;
 }

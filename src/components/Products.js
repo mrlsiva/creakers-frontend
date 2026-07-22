@@ -48,6 +48,18 @@ const Products = () => {
     searchRef.current?.focus();
   };
 
+  const maxDiscountPercent = products.reduce((max, product) => {
+    const mrp = product.pricing?.mrp || 0;
+    const ourPrice = product.pricing?.our_price || product.price || 0;
+    const savings = product.pricing?.savings || (mrp > ourPrice ? mrp - ourPrice : 0);
+    const discountType = product.pricing?.discount_type;
+    const discountValue = product.pricing?.discount_value || 0;
+    const percent = discountType === 'percentage' && discountValue > 0
+      ? discountValue
+      : (savings > 0 && mrp > 0 ? Math.round((savings / mrp) * 100) : 0);
+    return percent > max ? percent : max;
+  }, 0);
+
   return (
     <div className="pl-page" id="products-page">
       {/* Page Header */}
@@ -126,14 +138,16 @@ const Products = () => {
               ))}
             </ul>
 
-            <div className="pl-sidebar-offer">
-              <div className="pl-offer-badge">80% OFF</div>
-              <p className="pl-offer-text">On selected products this Diwali season!</p>
-              <div className="pl-offer-min">
-                <span>Min Order</span>
-                <strong>TN ₹3,000 · Others ₹5,000</strong>
+            {maxDiscountPercent > 0 && (
+              <div className="pl-sidebar-offer">
+                <div className="pl-offer-badge">{maxDiscountPercent}% OFF</div>
+                <p className="pl-offer-text">On selected products this Diwali season!</p>
+                <div className="pl-offer-min">
+                  <span>Min Order</span>
+                  <strong>TN ₹3,000 · Others ₹5,000</strong>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </aside>
 

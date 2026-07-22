@@ -64,7 +64,7 @@ const Header = ({ site }) => {
       </div>
       <header className="header">
         <div className="header-top">
-          <Link to="/home" className="logo" style={{ textDecoration: 'none' }}>
+          <Link to="/" className="logo" style={{ textDecoration: 'none' }}>
             {site?.logo ? (
               <img src={resolveAssetUrl(site.logo)} alt={site.name || 'Logo'} className="logo-image" />
             ) : (
@@ -88,7 +88,7 @@ const Header = ({ site }) => {
             style={{ '--header-height': `${headerHeight}px` }}
           >
             <ul className="nav-links">
-              <li><Link to="/home" className={pathname === '/home' ? 'nav-active' : ''}>Home</Link></li>
+              <li><Link to="/" className={pathname === '/' ? 'nav-active' : ''}>Home</Link></li>
               <li><Link to="/about-us" className={pathname === '/about-us' ? 'nav-active' : ''}>About</Link></li>
               <li>
                 <Link to="/products" className={pathname === '/products' ? 'nav-active' : ''}>
@@ -117,14 +117,14 @@ const Header = ({ site }) => {
               <Link to="/order-track" className="call-now">
                 <span aria-hidden="true">📦</span> Order Track
               </Link>
-              <Link to="/order" className="btn btn-order-now">Order Now</Link>
+              <Link to="/order" className="btn btn-order-now">Quick Enquiry</Link>
             </div>
           </nav>
           <div className="header-actions header-actions-desktop">
             <Link to="/order-track" className="call-now">
               <span aria-hidden="true">📦</span> Order Track
             </Link>
-            <Link to="/order" className="btn btn-order-now">Order Now</Link>
+            <Link to="/order" className="btn btn-order-now">Quick Enquiry</Link>
           </div>
         </div>
       </header>

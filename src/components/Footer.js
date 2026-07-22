@@ -31,7 +31,7 @@ const Footer = () => {
   const siteName = site?.name || 'Vigo Crackers';
 
   const quickLinks = [
-    { label: 'Home', to: '/home' },
+    { label: 'Home', to: '/' },
     { label: 'About Us', to: '/about-us' },
     { label: 'Categories', to: '/products' },
     { label: 'How to Order', to: '/how-to-order' },

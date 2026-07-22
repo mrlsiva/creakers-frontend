@@ -106,8 +106,8 @@ function App() {
       <Header site={site} />
       <main className="main">
         <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/order" element={<QuickEnquiry />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/how-to-order" element={<HowToOrder />} />
