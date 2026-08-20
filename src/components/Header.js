@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getContentPage, getPriceListDownloadUrl, resolveAssetUrl } from '../services/api';
 
-const DEFAULT_BANNER_TEXT = '🎆 Diwali Booking Started...! | 80% Discount offer 🎆 | Minimum order for Tamil Nadu ₹3,000/- | Other states ₹5,000/-';
+const DEFAULT_BANNER_TEXT = 'Diwali Booking Started...!';
 
 const stripHtml = (html) => {
   if (!html) return '';
@@ -79,7 +79,7 @@ const Header = ({ site }) => {
             ) : (
               <span className="logo-icon">💥</span>
             )}
-            <span>{site?.name ? site.name.toUpperCase() : 'VIGO CREAKERS'}</span>
+            <span>{site?.name ? site.name.toUpperCase() : 'VIGO crackers'}</span>
           </Link>
           <button
             type="button"

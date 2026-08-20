@@ -13,11 +13,11 @@
       "Bash(mkdir -p /tmp/pwtest)",
       "Bash(npm init *)",
       "Bash(npm install *)",
-      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-menu.js\" .)",
-      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-menu2.js\" /tmp/pwtest/)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\crackers-frontend\\\\verify-menu.js\" .)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\crackers-frontend\\\\verify-menu2.js\" /tmp/pwtest/)",
       "Bash(node verify-menu2.js)",
       "Bash(grep -n \"to=\\\\\"/\\\\|to='/\\\\|href=\\\\\"/\\\\|Link to\" src/components/Header.js src/components/Footer.js src/components/Home.js src/components/QuickEnquiry.js src/components/*.js)",
-      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\creakers-frontend\\\\verify-routes.js\" /tmp/pwtest/)",
+      "Bash(cp \"c:\\\\xampp\\\\htdocs\\\\crackers-frontend\\\\verify-routes.js\" /tmp/pwtest/)",
       "Bash(node verify-routes.js)"
     ]
   }
