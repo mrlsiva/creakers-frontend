@@ -132,7 +132,7 @@ const Home = () => {
                 href={btn.url}
                 target={btn.open_in_new_tab ? '_blank' : undefined}
                 rel={btn.open_in_new_tab ? 'noopener noreferrer' : undefined}
-                className={`btn ${idx === 0 ? 'btn-primary' : 'btn-outline-gold'} btn-lg`}
+                className={`btn ${idx === 0 ? 'btn-primary btn-order-now' : 'btn-outline-gold'} btn-lg`}
               >
                 {btn.label}
               </a>
