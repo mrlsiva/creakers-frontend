@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getCategories, getProducts, resolveAssetUrl } from '../services/api';
+import { getCategories, getAllProducts, resolveAssetUrl } from '../services/api';
 import './Products.css';
 
 const getImage = (product) => {
@@ -27,10 +27,9 @@ const Products = () => {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const data = await getProducts({
+        const data = await getAllProducts({
           category: selectedCategory,
           search: searchTerm,
-          per_page: 100,
         });
         if (data.success) setProducts(data.data || []);
         setError(null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getProducts, placeOrder, resolveAssetUrl } from '../services/api';
+import { getAllProducts, placeOrder, resolveAssetUrl } from '../services/api';
 import './QuickEnquiry.css';
 const CART_STORAGE_KEY = 'vigo_qe_cart';
 
@@ -22,6 +22,7 @@ const QuickEnquiry = () => {
   const [orderNumber, setOrderNumber] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [previewImage, setPreviewImage] = useState(null); // { src, alt }
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
@@ -41,10 +42,17 @@ const QuickEnquiry = () => {
   }, [cart]);
 
   useEffect(() => {
+    if (!previewImage) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setPreviewImage(null); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [previewImage]);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const data = await getProducts({ per_page: 200 });
+        const data = await getAllProducts();
         if (data.success && data.data) {
           setProducts(data.data);
         }
@@ -267,7 +275,13 @@ const getImage = (product) => {
                   <tr key={product.id} className={qty > 0 ? 'qe-row-active' : ''}>
                     <td className="td-preview">
                       {imgSrc ? (
-                        <img src={imgSrc} alt={product.name} className="qe-product-img" loading="lazy" />
+                        <img
+                          src={imgSrc}
+                          alt={product.name}
+                          className="qe-product-img qe-img-clickable"
+                          loading="lazy"
+                          onClick={() => setPreviewImage({ src: imgSrc, alt: product.name })}
+                        />
                       ) : (
                         <div className="qe-img-placeholder">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -366,7 +380,13 @@ const getImage = (product) => {
                 <div className="qe-mc-top">
                   <div className="qe-mc-img-wrap">
                     {imgSrc ? (
-                      <img src={imgSrc} alt={product.name} className="qe-mc-img" loading="lazy" />
+                      <img
+                        src={imgSrc}
+                        alt={product.name}
+                        className="qe-mc-img qe-img-clickable"
+                        loading="lazy"
+                        onClick={() => setPreviewImage({ src: imgSrc, alt: product.name })}
+                      />
                     ) : (
                       <div className="qe-mc-img-placeholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -565,6 +585,17 @@ const getImage = (product) => {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div className="qe-img-overlay" onClick={e => { if (e.target === e.currentTarget) setPreviewImage(null); }}>
+          <div className="qe-img-modal">
+            <button className="qe-img-modal-close" onClick={() => setPreviewImage(null)} aria-label="Close">✕</button>
+            <img src={previewImage.src} alt={previewImage.alt} className="qe-img-modal-pic" />
+            <p className="qe-img-modal-caption">{previewImage.alt}</p>
           </div>
         </div>
       )}

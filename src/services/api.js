@@ -90,6 +90,32 @@ export const getProducts = (filters = {}, slug = SITE_SLUG) => {
   return api.get(`/${slug}/products?${params.toString()}`).then((r) => r.data);
 };
 
+// Fetches every page of the products listing and returns them combined.
+// Use this instead of a single getProducts({ per_page: N }) call whenever the
+// caller needs the FULL matching set — a fixed per_page silently truncates
+// once the catalog outgrows it, splitting whichever category lands on the boundary.
+export const getAllProducts = async (filters = {}, slug = SITE_SLUG) => {
+  const params = new URLSearchParams();
+  if (filters.category) params.append('category', filters.category);
+  if (filters.search) params.append('search', filters.search);
+  params.append('per_page', 100);
+
+  let page = 1;
+  let allData = [];
+  let first = null;
+  while (true) {
+    params.set('page', page);
+    const res = await api.get(`/${slug}/products?${params.toString()}`).then((r) => r.data);
+    if (!first) first = res;
+    if (!res.success) break;
+    allData = allData.concat(res.data || []);
+    if (!res.meta || page >= res.meta.last_page) break;
+    page += 1;
+  }
+
+  return { ...first, data: allData };
+};
+
 export const getProduct = (slug, productSlug = '') =>
   api.get(`/${slug}/products/${productSlug}`).then((r) => r.data);
 
