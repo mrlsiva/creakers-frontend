@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAllProducts, placeOrder, resolveAssetUrl } from '../services/api';
+import { getAllProducts, getCategories, placeOrder, resolveAssetUrl } from '../services/api';
 import './QuickEnquiry.css';
 const CART_STORAGE_KEY = 'vigo_qe_cart';
 
@@ -14,6 +14,7 @@ const loadStoredCart = () => {
 
 const QuickEnquiry = () => {
   const [products, setProducts] = useState([]);
+  const [categoryOrder, setCategoryOrder] = useState([]); // category ids, in price-list order
   const [cart, setCart] = useState(loadStoredCart); // { productId: qty }
   const [loading, setLoading] = useState(true);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -63,6 +64,12 @@ const QuickEnquiry = () => {
       }
     };
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    getCategories()
+      .then(data => { if (data.success) setCategoryOrder((data.data || []).map(c => c.id)); })
+      .catch(() => {});
   }, []);
 
   const getQty = (id) => cart[id] || 0;
@@ -165,6 +172,12 @@ const getImage = (product) => {
     return resolveAssetUrl(img);
   };
 
+  const categoryRank = (product) => {
+    const id = product.category?.id ?? product.category_id;
+    const idx = categoryOrder.indexOf(id);
+    return idx === -1 ? categoryOrder.length : idx;
+  };
+
   return (
     <div className="qe-page" id="quick-enquiry">
       {/* Header */}
@@ -240,11 +253,7 @@ const getImage = (product) => {
                 </tr>
               ) : (() => {
                 // Sort by category so same-category products are together
-                const sorted = [...filteredProducts].sort((a, b) => {
-                  const aName = a.category?.name || a.category_name || '';
-                  const bName = b.category?.name || b.category_name || '';
-                  return aName.localeCompare(bName);
-                });
+                const sorted = [...filteredProducts].sort((a, b) => categoryRank(a) - categoryRank(b));
                 const rows = [];
                 let lastCatKey = undefined;
                 sorted.forEach(product => {
@@ -348,11 +357,7 @@ const getImage = (product) => {
 
         {/* Mobile card view */}
         {!loading && (() => {
-          const sorted = [...filteredProducts].sort((a, b) => {
-            const aName = a.category?.name || a.category_name || '';
-            const bName = b.category?.name || b.category_name || '';
-            return aName.localeCompare(bName);
-          });
+          const sorted = [...filteredProducts].sort((a, b) => categoryRank(a) - categoryRank(b));
           const cards = [];
           let lastCatKey = undefined;
           sorted.forEach(product => {
