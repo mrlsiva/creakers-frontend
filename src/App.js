@@ -16,6 +16,8 @@ import TermsConditions from './components/TermsConditions';
 import UnderMaintenance from './components/UnderMaintenance';
 import WelcomePopup from './components/WelcomePopup';
 import RefreshCache from './components/RefreshCache';
+import { OrdersClosedPopup } from './components/OrdersClosedNotice';
+import { OrdersStatusProvider, useOrdersStatus } from './OrdersStatusContext';
 import { getSite, resolveAssetUrl, prefetchAll } from './services/api';
 
 function ScrollToTop() {
@@ -26,6 +28,12 @@ function ScrollToTop() {
   }, [pathname]);
 
   return null;
+}
+
+// While orders are closed the closed notice replaces the welcome popup, so two modals never stack.
+function SitePopup() {
+  const { ordersEnabled } = useOrdersStatus();
+  return ordersEnabled ? <WelcomePopup /> : <OrdersClosedPopup />;
 }
 
 function App() {
@@ -100,37 +108,39 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <WelcomePopup />
-      <Header site={site} />
-      <main className="main">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
-          <Route path="/order" element={<QuickEnquiry />} />
-          <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/how-to-order" element={<HowToOrder />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/order-track" element={<OrderTrack />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/safety-tips" element={<SafetyTips />} />
-          <Route path="/price-list" element={<PriceList />} />
-          <Route path="/terms-conditions" element={<TermsConditions />} />
-          <Route path="/clear" element={<RefreshCache />} />
-        </Routes>
-      </main>
-      <Footer />
-      <a
-        className="whatsapp-float"
-        href="https://api.whatsapp.com/send?phone=919486046411"
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Chat on WhatsApp"
-      >
-        <i className="fab fa-whatsapp" />
-      </a>
-    </BrowserRouter>
+    <OrdersStatusProvider initialSite={site}>
+      <BrowserRouter>
+        <ScrollToTop />
+        <SitePopup />
+        <Header site={site} />
+        <main className="main">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/order" element={<QuickEnquiry />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/how-to-order" element={<HowToOrder />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/order-track" element={<OrderTrack />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/safety-tips" element={<SafetyTips />} />
+            <Route path="/price-list" element={<PriceList />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/clear" element={<RefreshCache />} />
+          </Routes>
+        </main>
+        <Footer />
+        <a
+          className="whatsapp-float"
+          href="https://api.whatsapp.com/send?phone=919486046411"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Chat on WhatsApp"
+        >
+          <i className="fab fa-whatsapp" />
+        </a>
+      </BrowserRouter>
+    </OrdersStatusProvider>
   );
 }
 

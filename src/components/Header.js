@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getContentPage, getPriceListDownloadUrl, resolveAssetUrl } from '../services/api';
+import { useOrdersStatus } from '../OrdersStatusContext';
+import { OrdersClosedBanner } from './OrdersClosedNotice';
 
 const DEFAULT_BANNER_TEXT = 'Diwali Booking Started...!';
 
@@ -17,6 +19,7 @@ const Header = ({ site }) => {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [priceListLoading, setPriceListLoading] = useState(false);
   const headerRef = useRef(null);
+  const { ordersEnabled, closedMessage } = useOrdersStatus();
 
   const handlePriceListClick = (e) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ const Header = ({ site }) => {
     updateHeaderHeight();
     window.addEventListener('resize', updateHeaderHeight);
     return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [bannerText]);
+  }, [bannerText, ordersEnabled, closedMessage]);
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen);
@@ -65,6 +68,7 @@ const Header = ({ site }) => {
 
   return (
     <div className="site-header-wrap" ref={headerRef}>
+      <OrdersClosedBanner />
       <div className="header-banner">
         <div className="banner-track">
           <span className="banner-text">{bannerText}</span>

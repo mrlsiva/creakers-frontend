@@ -69,6 +69,17 @@ export const getSites = () =>
 export const getSite = (slug = SITE_SLUG) =>
   cached(`site:${slug}`, () => api.get(`/${slug}`).then((r) => r.data));
 
+// Bypasses the cache (orders_enabled can be toggled by the admin at any time)
+// and refreshes the cached copy with the result.
+export const getSiteFresh = async (slug = SITE_SLUG) => {
+  const data = await api.get(`/${slug}`).then((r) => r.data);
+  if (data?.success) {
+    mem[`site:${slug}`] = data;
+    lsWrite(`site:${slug}`, data);
+  }
+  return data;
+};
+
 // Home Banner
 export const getHomeBanner = (slug = SITE_SLUG) =>
   cached(`home-banner:${slug}`, () => api.get(`/${slug}/home-banner`).then((r) => r.data));

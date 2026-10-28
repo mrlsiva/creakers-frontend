@@ -312,7 +312,7 @@ body.menu-open {
 .whatsapp-float {
   position: fixed;
   left: 20px;
-  bottom: 24px;
+  bottom: calc(24px + var(--cart-bar-h, 0px));
   z-index: 200;
   display: flex;
   align-items: center;
@@ -323,7 +323,7 @@ body.menu-open {
   background: #25d366;
   color: var(--white, #fff);
   font-size: 30px;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, bottom 0.2s ease;
   outline: none;
   border: none;
   text-decoration: none;
@@ -1656,5 +1656,112 @@ body.menu-open {
 
   .site-popup-body {
     overflow-y: visible;
+  }
+}
+
+/* Orders Closed — header banner + popup */
+.orders-closed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--dark-red);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.orders-closed-banner-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.orders-closed-banner-more {
+  flex-shrink: 0;
+  background: var(--primary-gold);
+  color: var(--dark-red);
+  border: none;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.orders-closed-banner-more:hover {
+  background: var(--white);
+}
+
+.orders-closed-modal {
+  max-width: 520px;
+}
+
+.orders-closed-body {
+  padding: 24px;
+  overflow-y: auto;
+  max-height: 75vh;
+  color: #333;
+  text-align: center;
+}
+
+.orders-closed-message {
+  white-space: pre-line;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  color: #222;
+}
+
+.orders-closed-hint {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.orders-closed-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.orders-closed-btn,
+.orders-closed-btn-secondary {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.orders-closed-btn {
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+  color: var(--white);
+  border: none;
+}
+
+.orders-closed-btn-secondary {
+  background: var(--white);
+  color: var(--dark-red);
+  border: 2px solid var(--dark-red);
+}
+
+@media (max-width: 600px) {
+  .orders-closed-banner {
+    font-size: 13px;
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .orders-closed-body {
+    padding: 20px 16px;
   }
 }

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getAllProducts, getCategories, placeOrder, resolveAssetUrl } from '../services/api';
+import { useOrdersStatus } from '../OrdersStatusContext';
 import './QuickEnquiry.css';
 const CART_STORAGE_KEY = 'vigo_qe_cart';
 
@@ -24,6 +25,9 @@ const QuickEnquiry = () => {
   const [orderDetails, setOrderDetails] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [previewImage, setPreviewImage] = useState(null); // { src, alt }
+  const cartBarRef = useRef(null);
+  // When orders are closed the page stays browsable but read-only; the stored cart is kept for when they reopen.
+  const { ordersEnabled, markOrdersClosed } = useOrdersStatus();
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
@@ -102,6 +106,25 @@ const QuickEnquiry = () => {
 
   const cartTotal = cartItems.reduce((s, i) => s + i.total, 0);
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
+  const hasCartBar = ordersEnabled && cartCount > 0;
+
+  // Expose the fixed cart bar's height so floating buttons (WhatsApp) can sit above it
+  useEffect(() => {
+    const root = document.documentElement;
+    const bar = cartBarRef.current;
+    if (!hasCartBar || !bar) {
+      root.style.removeProperty('--cart-bar-h');
+      return;
+    }
+    const update = () => root.style.setProperty('--cart-bar-h', `${bar.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(bar);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty('--cart-bar-h');
+    };
+  }, [hasCartBar]);
 
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -152,7 +175,14 @@ const QuickEnquiry = () => {
         alert(res.message || 'Failed to place order. Please try again.');
       }
     } catch (err) {
-      alert('Error placing order: ' + err.message);
+      const data = err.response?.data;
+      if (err.response?.status === 403 && data?.orders_enabled === false) {
+        // Orders were closed while this page was open — explain why, keep the cart intact.
+        setShowCheckout(false);
+        markOrdersClosed(data.message);
+      } else {
+        alert('Error placing order: ' + err.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -172,6 +202,8 @@ const getImage = (product) => {
     return resolveAssetUrl(img);
   };
 
+  const columnCount = ordersEnabled ? 8 : 6;
+
   const categoryRank = (product) => {
     const id = product.category?.id ?? product.category_id;
     const idx = categoryOrder.indexOf(id);
@@ -185,7 +217,11 @@ const getImage = (product) => {
         <div className="qe-header-inner">
           <div>
             <h2 className="qe-title">Quick Enquiry</h2>
-            <p className="qe-subtitle">Add products to your cart and place an order instantly</p>
+            <p className="qe-subtitle">
+              {ordersEnabled
+                ? 'Add products to your cart and place an order instantly'
+                : 'Online orders are currently closed — you can still browse our products and prices'}
+            </p>
           </div>
           <div className="qe-search-wrap">
             <svg className="qe-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -216,7 +252,7 @@ const getImage = (product) => {
       )}
 
       {/* Product Table / Cards */}
-      <div className="qe-table-wrap" style={{ paddingBottom: cartCount > 0 ? '100px' : '30px' }}>
+      <div className="qe-table-wrap" style={{ paddingBottom: hasCartBar ? '100px' : '30px' }}>
         {loading ? (
           <div className="qe-loading">
             {[...Array(6)].map((_, i) => (
@@ -242,14 +278,14 @@ const getImage = (product) => {
                 <th className="th-mrp">M.R.P (₹)</th>
                 <th className="th-dis">Discount</th>
                 <th className="th-price">Our Price (₹)</th>
-                <th className="th-qty">Qty</th>
-                <th className="th-total">Total (₹)</th>
+                {ordersEnabled && <th className="th-qty">Qty</th>}
+                {ordersEnabled && <th className="th-total">Total (₹)</th>}
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="qe-empty">No products found</td>
+                  <td colSpan={columnCount} className="qe-empty">No products found</td>
                 </tr>
               ) : (() => {
                 // Sort by category so same-category products are together
@@ -264,7 +300,7 @@ const getImage = (product) => {
                     if (catName) {
                       rows.push(
                         <tr key={`cat-${catKey}`} className="qe-cat-row">
-                          <td colSpan="8">
+                          <td colSpan={columnCount}>
                             <span className="qe-cat-label">{catName}</span>
                           </td>
                         </tr>
@@ -276,7 +312,7 @@ const getImage = (product) => {
                   const ourPrice = product.pricing?.our_price || product.price || 0;
                   const discountLabel = formatDiscount(product.pricing, mrp, ourPrice);
                   const per = product.per || product.unit || '1 Pkt';
-                  const qty = getQty(product.id);
+                  const qty = ordersEnabled ? getQty(product.id) : 0;
                   const rowTotal = ourPrice * qty;
                   const imgSrc = getImage(product);
 
@@ -318,34 +354,38 @@ const getImage = (product) => {
                     <td className="td-price">
                       <span className="qe-our-price">₹{ourPrice}</span>
                     </td>
-                    <td className="td-qty">
-                      <div className="qe-qty-control">
-                        <button
-                          className="qe-qty-btn"
-                          onClick={() => decrement(product.id)}
-                          disabled={qty === 0}
-                          aria-label="Decrease"
-                        >−</button>
-                        <input
-                          className="qe-qty-input"
-                          type="number"
-                          min="0"
-                          value={qty === 0 ? '' : qty}
-                          placeholder="0"
-                          onChange={e => setQty(product.id, e.target.value)}
-                        />
-                        <button
-                          className="qe-qty-btn qe-qty-add"
-                          onClick={() => increment(product.id)}
-                          aria-label="Increase"
-                        >+</button>
-                      </div>
-                    </td>
-                    <td className="td-total">
-                      {qty > 0 ? (
-                        <span className="qe-row-total">₹{rowTotal}</span>
-                      ) : <span className="qe-na">—</span>}
-                    </td>
+                    {ordersEnabled && (
+                      <td className="td-qty">
+                        <div className="qe-qty-control">
+                          <button
+                            className="qe-qty-btn"
+                            onClick={() => decrement(product.id)}
+                            disabled={qty === 0}
+                            aria-label="Decrease"
+                          >−</button>
+                          <input
+                            className="qe-qty-input"
+                            type="number"
+                            min="0"
+                            value={qty === 0 ? '' : qty}
+                            placeholder="0"
+                            onChange={e => setQty(product.id, e.target.value)}
+                          />
+                          <button
+                            className="qe-qty-btn qe-qty-add"
+                            onClick={() => increment(product.id)}
+                            aria-label="Increase"
+                          >+</button>
+                        </div>
+                      </td>
+                    )}
+                    {ordersEnabled && (
+                      <td className="td-total">
+                        {qty > 0 ? (
+                          <span className="qe-row-total">₹{rowTotal}</span>
+                        ) : <span className="qe-na">—</span>}
+                      </td>
+                    )}
                   </tr>
                   );
                 });
@@ -377,7 +417,7 @@ const getImage = (product) => {
             const ourPrice = product.pricing?.our_price || product.price || 0;
             const discountLabel = formatDiscount(product.pricing, mrp, ourPrice);
             const per = product.per || product.unit || '1 Pkt';
-            const qty = getQty(product.id);
+            const qty = ordersEnabled ? getQty(product.id) : 0;
             const rowTotal = ourPrice * qty;
             const imgSrc = getImage(product);
             cards.push(
@@ -411,20 +451,22 @@ const getImage = (product) => {
                   {discountLabel && <div className="qe-mc-price-item"><span>Discount</span><span className="qe-discount">{discountLabel}</span></div>}
                   <div className="qe-mc-price-item"><span>Price</span><span className="qe-our-price">₹{ourPrice}</span></div>
                 </div>
-                <div className="qe-mc-footer">
-                  <div className="qe-qty-control">
-                    <button className="qe-qty-btn" onClick={() => decrement(product.id)} disabled={qty === 0} aria-label="Decrease">−</button>
-                    <input
-                      className="qe-qty-input"
-                      type="number" min="0"
-                      value={qty === 0 ? '' : qty}
-                      placeholder="0"
-                      onChange={e => setQty(product.id, e.target.value)}
-                    />
-                    <button className="qe-qty-btn qe-qty-add" onClick={() => increment(product.id)} aria-label="Increase">+</button>
+                {ordersEnabled && (
+                  <div className="qe-mc-footer">
+                    <div className="qe-qty-control">
+                      <button className="qe-qty-btn" onClick={() => decrement(product.id)} disabled={qty === 0} aria-label="Decrease">−</button>
+                      <input
+                        className="qe-qty-input"
+                        type="number" min="0"
+                        value={qty === 0 ? '' : qty}
+                        placeholder="0"
+                        onChange={e => setQty(product.id, e.target.value)}
+                      />
+                      <button className="qe-qty-btn qe-qty-add" onClick={() => increment(product.id)} aria-label="Increase">+</button>
+                    </div>
+                    {qty > 0 && <span className="qe-mc-total">₹{rowTotal}</span>}
                   </div>
-                  {qty > 0 && <span className="qe-mc-total">₹{rowTotal}</span>}
-                </div>
+                )}
               </div>
             );
           });
@@ -433,8 +475,8 @@ const getImage = (product) => {
       </div>
 
       {/* Fixed Bottom Cart Bar */}
-      {cartCount > 0 && (
-        <div className="qe-cart-bar">
+      {hasCartBar && (
+        <div className="qe-cart-bar" ref={cartBarRef}>
           {cartTotal < 3000 && (
             <div className="qe-min-order-warn">
               Minimum order ₹3,000 — add ₹{(3000 - cartTotal).toLocaleString('en-IN')} more to checkout
@@ -473,7 +515,7 @@ const getImage = (product) => {
       )}
 
       {/* Checkout Modal */}
-      {showCheckout && (
+      {showCheckout && (ordersEnabled || submitted) && (
         <div className="qe-overlay" onClick={e => { if (e.target === e.currentTarget) { setShowCheckout(false); setOrderDetails(null); setSubmitted(false); } }}>
           <div className="qe-modal">
             <div className="qe-modal-header">
